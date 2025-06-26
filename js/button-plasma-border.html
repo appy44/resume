@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hover In + Reverse Out Border Glow</title>
+  <style>
+    body {
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .glow-button {
+      position: relative;
+      padding: 14px 40px;
+      background: #111;
+      color: white;
+      font-size: 18px;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .glow-button svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .glow-rect {
+      fill: none;
+      stroke: #00f0ff;
+      stroke-width: 3;
+      stroke-dasharray: 800;
+      stroke-dashoffset: 800;
+      rx: 16;
+      ry: 16;
+      filter: drop-shadow(0 0 6px #00f0ff);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Forward animation */
+    .animate-forward {
+      animation: dashIn 1s ease-out forwards;
+    }
+
+    /* Reverse animation */
+    .animate-reverse {
+      animation: dashOut 1s ease-out forwards;
+    }
+
+    @keyframes dashIn {
+      0% {
+        stroke-dashoffset: 800;
+        opacity: 1;
+      }
+      100% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+      }
+    }
+
+    @keyframes dashOut {
+      0% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+      }
+      100% {
+        stroke-dashoffset: 800;
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<button class="glow-button" id="glowBtn">
+  Download
+  <svg viewBox="0 0 220 60" preserveAspectRatio="none">
+    <rect class="glow-rect" x="2" y="2" width="216" height="56" />
+  </svg>
+</button>
+
+<script>
+  const btn = document.getElementById("glowBtn");
+  const rect = btn.querySelector(".glow-rect");
+
+  btn.addEventListener("mouseenter", () => {
+    rect.classList.remove("animate-reverse");
+    rect.classList.add("animate-forward");
+  });
+
+  btn.addEventListener("mouseleave", () => {
+    rect.classList.remove("animate-forward");
+    rect.classList.add("animate-reverse");
+  });
+</script>
+
+</body>
+</html>

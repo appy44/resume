@@ -1,0 +1,35 @@
+@media (min-width: 768px) {
+    body, html {
+        cursor: none;
+    }
+
+    * {
+        cursor: none !important;
+    }
+
+    #cursor-dot, #cursor-ring {
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 10000;
+        transform: translate(-50%, -50%);
+    }
+
+    #cursor-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--neon-glow-cursor-ring);
+        border-radius: 50%;
+        transition: background 0s;
+    }
+
+    #cursor-ring {
+        width: 40px;
+        height: 40px;
+        border: 2px solid var(--neon-glow-cursor-ring);
+        border-radius: 90%;
+        transition: border-color 0.2s;
+        backdrop-filter: blur(0px);
+    }
+}

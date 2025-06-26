@@ -1,0 +1,38 @@
+/* WebKit (Chrome, Safari, Edge Chromium) */
+html::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+html::-webkit-scrollbar-thumb {
+  background-color: rgba(120, 120, 120, 0.5);
+  border-radius: 8px;
+  border: none;
+}
+
+/* Only on hover: darker thumb */
+html:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(120, 120, 120, 0.8);
+}
+
+/* Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 120, 120, 0.5) transparent;
+}
+
+/* Optional: Hide scrollbar on mobile */
+@media (max-width: 768px) {
+  html::-webkit-scrollbar {
+    display: none;
+  }
+
+  html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}

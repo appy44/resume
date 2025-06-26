@@ -1,0 +1,222 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mayur Shivaji Sontale | Resume</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/scrollbar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+<body>
+
+<div class="theme-toggle">
+    <label class="switch">
+        <input type="checkbox" id="mode-toggle" onclick="toggleTheme()">
+        <span class="slider"></span>
+    </label>
+</div>
+
+
+<!-- HTML: Modular Hire Me Modal -->
+<div id="hm-modal" class="hm-modal">
+    <div class="hm-modal-content">
+        <div style="text-align:Center">
+            <a href="download-cv.php" download class="btn-glow btn-sm" id="cv-download-btn">
+                Download CV
+                <svg viewBox="0 0 220 60" preserveAspectRatio="none">
+                    <rect class="btn-glow-rect"/>
+                </svg>
+            </a>
+        </div>
+
+        <span class="hm-close" onclick="HM.close()">×</span>
+        <pre id="hm-output" class="hm-typewriter"></pre>
+    </div>
+</div>
+
+
+<section class="hero-card">
+    <div class="hero-content">
+        <div class="hero-text">
+            <p class="subtitle">Backend Engineer</p>
+            <h1>Hello, I am <span class="highlight">Mayur</span></h1>
+            <p class="description">
+            </p><h5>Results-driven developer <span class="test-line">|</span> 9+ years experience</h5>
+            <h5> Java <span class="test-line">|</span> Python <span class="test-line">|</span> AWS <span
+                    class="test-line">|</span> Backend services</h5>
+            <h5>I design scalable systems <span class="test-line">|</span> love automation and clean code.</h5>
+            <h5><br></h5>
+            <p></p>
+            <button class="hire-btn hm-trigger" onclick="HM.open()">Hire Me</button>
+            <div class="social-icons">
+
+                <div class="icon-wrapper">
+                    <a href="#"
+                       class="neon-icon"
+                       title="Not now, secret code brewing">
+                        <i class="fa fa-github"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/mayur-sontale-6697739b/"
+                       class="neon-icon"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        <i class="fa fa-linkedin"></i>
+                    </a>
+                    <a href="#" class="neon-icon"><i class="fa fa-envelope"></i></a>
+                </div>
+
+            </div>
+
+        </div>
+        <!-- Profile Image with Googly Eyes -->
+        <div class="hero-image googly-wrapper">
+            <img src="images/developer-profile.png" alt="Mayur" id="mayur-img">
+            <div class="eye eye-left">
+                <div class="pupil" style="transform: translate(0px, 0px);"></div>
+            </div>
+            <div class="eye eye-right">
+                <div class="pupil" style="transform: translate(0px, 0px);"></div>
+            </div>
+        </div>
+
+        <!-- JS: Googly Eyes with Clamp + Reset -->
+        <script>
+
+        </script>
+
+
+    </div>
+</section>
+
+
+<section id="about">
+    <h2>About Me</h2>
+    <p>Results-driven Software Developer with 9+ years of experience in Java, Python, and full-stack development. Proven
+        expertise in building scalable backend systems, cloud-native applications on AWS, and ERP platforms. Adept at
+        CI/CD implementation, leading modules, and delivering high-quality solutions across telecom, financial, and
+        enterprise domains.</p>
+</section>
+
+
+<!-- Experience Carousel Section -->
+<section class="exp-carousel">
+    <h2>Experience &amp; Contributions</h2>
+    <div class="exp-carousel-container">
+
+        <div class="exp-card" onclick="openExperienceModal(5)">
+            <div class="exp-badge">5</div>
+            <h3 class="exp-title">Module Lead</h3>
+            <p class="exp-company">YASH Technologies</p>
+            <p class="exp-duration">2023 – Present</p>
+        </div>
+
+        <div class="exp-card" onclick="openExperienceModal(4)">
+            <div class="exp-badge">4</div>
+            <h3 class="exp-title">Senior Developer</h3>
+            <p class="exp-company">Capgemini</p>
+            <p class="exp-duration">2020 – 2023</p>
+        </div>
+
+        <div class="exp-card" onclick="openExperienceModal(3)">
+            <div class="exp-badge">3</div>
+            <h3 class="exp-title">Java Developer</h3>
+            <p class="exp-company">IBM (Vodafone)</p>
+            <p class="exp-duration">2018 – 2020</p>
+        </div>
+
+
+        <div class="exp-card" onclick="openExperienceModal(2)">
+            <div class="exp-badge">2</div>
+            <h3 class="exp-title">Software Developer</h3>
+            <p class="exp-company">e-Aaria Software</p>
+            <p class="exp-duration">2016 – 2018</p>
+        </div>
+
+        <div class="exp-card" onclick="openExperienceModal(1)">
+            <div class="exp-badge">1</div>
+            <h3 class="exp-title">Java Developer</h3>
+            <p class="exp-company">Evoke Systems</p>
+            <p class="exp-duration">2015 – 2016</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- Link external CSS -->
+<link rel="stylesheet" href="css/experience-carousel.css">
+<link rel="stylesheet" href="css/skills.css">
+
+<div id="exp-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <div id="modal-body">
+            <!-- content will be injected here -->
+        </div>
+    </div>
+</div>
+
+
+<section id="skills">
+    <h2>Skills</h2>
+    <div class="skills">
+        <span class="skill-chip" data-exp="9 yrs" data-tone="click">Java</span>
+        <span class="skill-chip" data-exp="6 yrs" data-tone="click">Spring Boot</span>
+        <span class="skill-chip" data-exp="5 yrs" data-tone="click">Python</span>
+        <span class="skill-chip" data-exp="5 yrs" data-tone="click">AWS</span>
+        <span class="skill-chip" data-exp="3 yrs" data-tone="click">Terraform</span>
+        <span class="skill-chip" data-exp="3 yrs" data-tone="click">Node.js</span>
+        <span class="skill-chip" data-exp="3 yrs" data-tone="click">MySQL</span>
+        <span class="skill-chip" data-exp="4 yrs" data-tone="click">DynamoDB</span>
+        <span class="skill-chip" data-exp="5 yrs" data-tone="click">CI/CD</span>
+        <span class="skill-chip" data-exp="5 yrs" data-tone="click">Android</span>
+    </div>
+
+</section>
+<footer>
+    <p>Contact: mayursontale@gmail.com | +91 **********</p>
+    <p><a href="http://www.mayursontale.co.in">www.mayursontale.co.in</a></p>
+</footer>
+
+<div id="rightClickToast" class="toast-message" style="display:none;">
+    😜
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/script.js"></script>
+
+<!-- Your script -->
+<script src="js/soundEffect.js"></script>
+<script>
+    let soundReady = false;
+
+    // Allow sound after user interaction
+    window.addEventListener("click", () => {
+        soundReady = true;
+    });
+
+    $(document).ready(function () {
+        const toneMap = {};
+
+        $('.skill-chip').each(function () {
+            const tone = $(this).data('tone');
+            if (!toneMap[tone]) {
+                toneMap[tone] = new Audio(`sounds/${tone}.mp3`);
+                toneMap[tone].volume = 1;
+            }
+
+            $(this).on('mouseenter', function () {
+                if (soundReady && toneMap[tone]) {
+                    toneMap[tone].currentTime = 0;
+                    toneMap[tone].play().catch(() => {
+                        console.warn(`🔇 ${tone}.mp3 blocked`);
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+<link rel="stylesheet" href="css/animated-cursor.css">
+<script src="js/animated-cursor.js"></script>
+</body>
+</html>

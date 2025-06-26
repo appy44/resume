@@ -1,0 +1,82 @@
+.skills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* This centers the skill items horizontally */
+    gap: 16px; /* Optional: uniform spacing between items */
+    padding: 10px 0;
+}
+
+.skill-chip {
+    position: relative;
+    background: var(--accent-bg);
+    color: var(--text-color);
+    padding: 12px 18px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 1em;
+    transition: transform 0.3s ease;
+    border: 2px solid var(--accent-bg);
+    cursor: default;
+}
+
+.skill-chip:hover {
+    transform: scale(1.05);
+}
+
+.skill-chip::after {
+    content: attr(data-exp);
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background: var(--neon-glow);
+    color: #fff;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 25px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.skill-chip:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+
+.skill-chip {
+    min-width: 100px;
+}
+
+@media (max-width: 480px) {
+    .skill-chip {
+        font-size: 0.85rem;
+        padding: 8px 14px;
+    }
+
+    .skills {
+        gap: 10px 12px;
+    }
+}
+
+
+.skill-chip {
+    background: var(--accent-bg);
+    padding: 10px 18px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--accent-bg);
+}
+
+.skill-chip:hover {
+    transform: scale(1.05);
+    background: #ffd580;
+}

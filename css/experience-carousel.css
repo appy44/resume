@@ -1,0 +1,92 @@
+/* Themed Styles for Experience Carousel */
+.exp-carousel {
+    padding: 20px;
+    color: var(--text-color);
+    border-radius: 20px;
+    max-width: 960px;
+    margin: 40px auto;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.exp-carousel-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 20px;
+    scroll-snap-type: x mandatory;
+    padding: 10px;
+    scroll-behavior: smooth;
+}
+
+.exp-card {
+    flex: 0 0 auto;
+    margin-top: 10px;
+    width: 220px;
+    background: var(--content-bg);
+    color: var(--text-color);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    position: relative;
+    scroll-snap-align: start;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.exp-badge {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--accent-bg);
+    color: var(--text-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    z-index: 1;
+}
+
+.exp-title {
+    margin: 20px 0 5px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.exp-company {
+    font-size: 15px;
+    color: var(--text-color);
+    opacity: 0.8;
+    margin-bottom: 4px;
+}
+
+.exp-duration {
+    font-size: 14px;
+    color: var(--text-color);
+    opacity: 0.6;
+}
+
+/* Responsive scrollbar */
+.exp-carousel-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.exp-carousel-container::-webkit-scrollbar-track {
+    background: #ddd;
+}
+
+.exp-carousel-container::-webkit-scrollbar-thumb {
+    background-color: var(--accent-bg);
+    border-radius: 10px;
+}
+
+/* Firefox scrollbar */
+.exp-carousel-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-bg) #ddd;
+}
