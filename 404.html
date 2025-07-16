@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Oops! 404 Not Found</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #e6f9fc;
+      font-family: 'Segoe UI', sans-serif;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .error {
+      font-size: 120px;
+      font-weight: bold;
+      color: #ff4b91;
+      animation: float 2s ease-in-out infinite;
+    }
+
+    .message {
+      font-size: 24px;
+      margin-top: -10px;
+      font-weight: 500;
+    }
+
+    .subtext {
+      font-size: 16px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .btn {
+      margin-top: 30px;
+      padding: 12px 30px;
+      background: #ff4b91;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:hover {
+      background: #ff2975;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0); }
+    }
+
+    .emoji {
+      font-size: 40px;
+      margin-top: 15px;
+      animation: blink 1.8s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  </style>
+</head>
+<body>
+  <div class="error">404</div>
+  <div class="message">Oops! You wandered off the page.</div>
+  <div class="subtext">"This page didn't pass the URL checks."</div>
+  <div class="emoji">😅</div>
+</body>
+</html>
