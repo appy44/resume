@@ -1,8 +1,9 @@
 
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8"/>
   <title>LeetCode Problem Tracker</title>
   <style>
     body {
@@ -36,63 +37,135 @@
   </style>
 </head>
 <body>
-  <h1>LeetCode Problem Tracker</h1>
-  <table id="trackerTable">
-    <thead>
-      <tr>
-        <th>Solved</th>
-        <th>Topic</th>
-        <th>Problem</th>
-        <th>Class File</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<h1>LeetCode Problem Tracker</h1>
+<table id="trackerTable">
+  <thead>
+  <tr>
+    <th>Solved</th>
+    <th>Topic</th>
+    <th>Problem</th>
+    <th>Class File</th>
+  </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-  <script>
-    const STORAGE_KEY = "leetcode_tracker_state_v2";
+<script>
+  const STORAGE_KEY = "leetcode_tracker_state_v2";
 
-    const problems = [
-      { topic: "Arrays", problem: "Two Sum", classFile: "TwoSum.java" },
-      { topic: "Arrays", problem: "Best Time to Buy and Sell Stock", classFile: "BestTimetoBuyandSellStock.java" },
-      { topic: "Hashing", problem: "Group Anagrams", classFile: "GroupAnagrams.java" },
-      { topic: "SlidingWindow", problem: "Longest Substring Without Repeating Characters", classFile: "LongestSubstringWithoutRepeatingCharacters.java" },
-      { topic: "Stack", problem: "Valid Parentheses", classFile: "ValidParentheses.java" },
-      { topic: "TwoPointers", problem: "3Sum", classFile: "ThreeSum.java" },
-      { topic: "DynamicProgramming", problem: "House Robber", classFile: "HouseRobber.java" }
-    ];
+  const problems = [
+    { topic: "Arrays", problem: "Two Sum", classFile: "TwoSum.java" },
+    { topic: "Arrays", problem: "Best Time to Buy and Sell Stock", classFile: "BestTimetoBuyandSellStock.java" },
+    { topic: "Arrays", problem: "Product of Array Except Self", classFile: "ProductofArrayExceptSelf.java" },
+    { topic: "Arrays", problem: "Maximum Subarray", classFile: "MaximumSubarray.java" },
+    { topic: "Arrays", problem: "Merge Intervals", classFile: "MergeIntervals.java" },
+    { topic: "Hashing", problem: "Group Anagrams", classFile: "GroupAnagrams.java" },
+    { topic: "Hashing", problem: "Top K Frequent Elements", classFile: "TopKFrequentElements.java" },
+    { topic: "Hashing", problem: "Valid Anagram", classFile: "ValidAnagram.java" },
+    { topic: "Hashing", problem: "Longest Consecutive Sequence", classFile: "LongestConsecutiveSequence.java" },
+    { topic: "Hashing", problem: "Subarray Sum Equals K", classFile: "SubarraySumEqualsK.java" },
+    { topic: "TwoPointers", problem: "3Sum", classFile: "3Sum.java" },
+    { topic: "TwoPointers", problem: "Valid Palindrome", classFile: "ValidPalindrome.java" },
+    { topic: "TwoPointers", problem: "Container With Most Water", classFile: "ContainerWithMostWater.java" },
+    { topic: "TwoPointers", problem: "Remove Duplicates from Sorted Array", classFile: "RemoveDuplicatesfromSortedArray.java" },
+    { topic: "TwoPointers", problem: "Partition Labels", classFile: "PartitionLabels.java" },
+    { topic: "SlidingWindow", problem: "Longest Substring Without Repeating Characters", classFile: "LongestSubstringWithoutRepeatingCharacters.java" },
+    { topic: "SlidingWindow", problem: "Minimum Window Substring", classFile: "MinimumWindowSubstring.java" },
+    { topic: "SlidingWindow", problem: "Permutation in String", classFile: "PermutationinString.java" },
+    { topic: "SlidingWindow", problem: "Sliding Window Maximum", classFile: "SlidingWindowMaximum.java" },
+    { topic: "SlidingWindow", problem: "Find All Anagrams in a String", classFile: "FindAllAnagramsinaString.java" },
+    { topic: "Stack", problem: "Valid Parentheses", classFile: "ValidParentheses.java" },
+    { topic: "Stack", problem: "Daily Temperatures", classFile: "DailyTemperatures.java" },
+    { topic: "Stack", problem: "Next Greater Element", classFile: "NextGreaterElement.java" },
+    { topic: "Stack", problem: "Evaluate Reverse Polish Notation", classFile: "EvaluateReversePolishNotation.java" },
+    { topic: "Stack", problem: "Min Stack", classFile: "MinStack.java" },
+    { topic: "Queue", problem: "Implement Queue using Stacks", classFile: "ImplementQueueusingStacks.java" },
+    { topic: "Queue", problem: "Number of Recent Calls", classFile: "NumberofRecentCalls.java" },
+    { topic: "Queue", problem: "Sliding Window Maximum", classFile: "SlidingWindowMaximum.java" },
+    { topic: "Queue", problem: "Rotting Oranges", classFile: "RottingOranges.java" },
+    { topic: "Queue", problem: "Perfect Squares", classFile: "PerfectSquares.java" },
+    { topic: "LinkedList", problem: "Reverse Linked List", classFile: "ReverseLinkedList.java" },
+    { topic: "LinkedList", problem: "Merge Two Sorted Lists", classFile: "MergeTwoSortedLists.java" },
+    { topic: "LinkedList", problem: "Linked List Cycle", classFile: "LinkedListCycle.java" },
+    { topic: "LinkedList", problem: "Remove Nth Node From End of List", classFile: "RemoveNthNodeFromEndofList.java" },
+    { topic: "LinkedList", problem: "Intersection of Two Linked Lists", classFile: "IntersectionofTwoLinkedLists.java" },
+    { topic: "Trees", problem: "Invert Binary Tree", classFile: "InvertBinaryTree.java" },
+    { topic: "Trees", problem: "Binary Tree Level Order Traversal", classFile: "BinaryTreeLevelOrderTraversal.java" },
+    { topic: "Trees", problem: "Diameter of Binary Tree", classFile: "DiameterofBinaryTree.java" },
+    { topic: "Trees", problem: "Maximum Depth of Binary Tree", classFile: "MaximumDepthofBinaryTree.java" },
+    { topic: "Trees", problem: "Lowest Common Ancestor", classFile: "LowestCommonAncestor.java" },
+    { topic: "Graphs", problem: "Clone Graph", classFile: "CloneGraph.java" },
+    { topic: "Graphs", problem: "Number of Islands", classFile: "NumberofIslands.java" },
+    { topic: "Graphs", problem: "Course Schedule", classFile: "CourseSchedule.java" },
+    { topic: "Graphs", problem: "Pacific Atlantic Water Flow", classFile: "PacificAtlanticWaterFlow.java" },
+    { topic: "Graphs", problem: "Graph Valid Tree", classFile: "GraphValidTree.java" },
+    { topic: "BinarySearch", problem: "Binary Search", classFile: "BinarySearch.java" },
+    { topic: "BinarySearch", problem: "Search in Rotated Sorted Array", classFile: "SearchinRotatedSortedArray.java" },
+    { topic: "BinarySearch", problem: "Koko Eating Bananas", classFile: "KokoEatingBananas.java" },
+    { topic: "BinarySearch", problem: "Median of Two Sorted Arrays", classFile: "MedianofTwoSortedArrays.java" },
+    { topic: "BinarySearch", problem: "Find Minimum in Rotated Sorted Array", classFile: "FindMinimuminRotatedSortedArray.java" },
+    { topic: "Heap", problem: "Merge K Sorted Lists", classFile: "MergeKSortedLists.java" },
+    { topic: "Heap", problem: "Top K Frequent Elements", classFile: "TopKFrequentElements.java" },
+    { topic: "Heap", problem: "Find Median from Data Stream", classFile: "FindMedianfromDataStream.java" },
+    { topic: "Heap", problem: "Kth Largest Element in an Array", classFile: "KthLargestElementinanArray.java" },
+    { topic: "Heap", problem: "Reorganize String", classFile: "ReorganizeString.java" },
+    { topic: "Greedy", problem: "Jump Game", classFile: "JumpGame.java" },
+    { topic: "Greedy", problem: "Task Scheduler", classFile: "TaskScheduler.java" },
+    { topic: "Greedy", problem: "Partition Labels", classFile: "PartitionLabels.java" },
+    { topic: "Greedy", problem: "Non-overlapping Intervals", classFile: "NonoverlappingIntervals.java" },
+    { topic: "Greedy", problem: "Gas Station", classFile: "GasStation.java" },
+    { topic: "Backtracking", problem: "Subsets", classFile: "Subsets.java" },
+    { topic: "Backtracking", problem: "Combination Sum", classFile: "CombinationSum.java" },
+    { topic: "Backtracking", problem: "Permutations", classFile: "Permutations.java" },
+    { topic: "Backtracking", problem: "Word Search", classFile: "WordSearch.java" },
+    { topic: "Backtracking", problem: "Palindrome Partitioning", classFile: "PalindromePartitioning.java" },
+    { topic: "DynamicProgramming", problem: "House Robber", classFile: "HouseRobber.java" },
+    { topic: "DynamicProgramming", problem: "Coin Change", classFile: "CoinChange.java" },
+    { topic: "DynamicProgramming", problem: "Longest Increasing Subsequence", classFile: "LongestIncreasingSubsequence.java" },
+    { topic: "DynamicProgramming", problem: "Edit Distance", classFile: "EditDistance.java" },
+    { topic: "DynamicProgramming", problem: "Target Sum", classFile: "TargetSum.java" },
+    { topic: "Trie", problem: "Implement Trie", classFile: "ImplementTrie.java" },
+    { topic: "Trie", problem: "Add and Search Word", classFile: "AddandSearchWord.java" },
+    { topic: "Trie", problem: "Replace Words", classFile: "ReplaceWords.java" },
+    { topic: "Trie", problem: "Word Search II", classFile: "WordSearchII.java" },
+    { topic: "Trie", problem: "Longest Word in Dictionary", classFile: "LongestWordinDictionary.java" },
+    { topic: "BitManipulation", problem: "Single Number", classFile: "SingleNumber.java" },
+    { topic: "BitManipulation", problem: "Counting Bits", classFile: "CountingBits.java" },
+    { topic: "BitManipulation", problem: "Sum of Two Integers", classFile: "SumofTwoIntegers.java" },
+    { topic: "BitManipulation", problem: "Reverse Bits", classFile: "ReverseBits.java" },
+    { topic: "BitManipulation", problem: "Hamming Distance", classFile: "HammingDistance.java" }
+  ];
 
-    const loadState = () => {
-      const json = localStorage.getItem(STORAGE_KEY);
-      return json ? JSON.parse(json) : {};
-    };
+  const loadState = () => {
+    const json = localStorage.getItem(STORAGE_KEY);
+    return json ? JSON.parse(json) : {};
+  };
 
-    const saveState = (state) => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    };
+  const saveState = (state) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  };
 
-    const renderTable = () => {
-      const state = loadState();
-      const tbody = document.querySelector("#trackerTable tbody");
-      tbody.innerHTML = "";
-      problems.forEach((p, index) => {
-        const tr = document.createElement("tr");
-        const solved = state[p.classFile] || false;
-        tr.innerHTML = `
-          <td><input type="checkbox" id="cb${index}" ${solved ? "checked" : ""}></td>
-          <td>${p.topic}</td>
-          <td>${p.problem}</td>
-          <td>${p.classFile}</td>
-        `;
-        tbody.appendChild(tr);
-        document.getElementById(`cb${index}`).addEventListener("change", (e) => {
-          state[p.classFile] = e.target.checked;
-          saveState(state);
-        });
+  const renderTable = () => {
+    const state = loadState();
+    const tbody = document.querySelector("#trackerTable tbody");
+    tbody.innerHTML = "";
+    problems.forEach((p, index) => {
+      const tr = document.createElement("tr");
+      const solved = state[p.classFile] || false;
+      tr.innerHTML = `
+      <td><input type="checkbox" id="cb${index}" ${solved ? "checked" : ""}></td>
+      <td>${p.topic}</td>
+      <td>${p.problem}</td>
+      <td>${p.classFile}</td>
+    `;
+      tbody.appendChild(tr);
+      document.getElementById(`cb${index}`).addEventListener("change", (e) => {
+        state[p.classFile] = e.target.checked;
+        saveState(state);
       });
-    };
+    });
+  };
 
-    renderTable();
-  </script>
-</body>
+  renderTable();
+</script></body>
 </html>
