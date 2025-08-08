@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title style="text-align:center">Saraswati Classess</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<style>
+  :root { --accent: #6c5ce7; --muted:#f8f9fa; --border:#dee2e6; --soft1:#dfe7fd; --soft2:#e0f7fa; --soft3:#fff3cd; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 16px; background:#fff; color:#212529; }
+  h1 { margin: 0 0 8px; font-size: 24px; color: var(--accent); }
+  .today { font-weight: 600; margin-bottom: 12px; }
+
+  .bar, .controls { display: flex; flex-wrap: wrap; gap:8px; margin: 8px 0; }
+  .bar input, .controls input, .controls select { padding:8px 10px; border:1px solid var(--border); border-radius:8px; }
+  .bar button, .controls button, .pill { padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:#fff; cursor:pointer; transition: background 0.2s; }
+  .bar button:hover, .controls button:hover { background: var(--soft2); }
+  .pill { background: var(--muted); }
+
+  .table-wrap { overflow:auto; border:1px solid var(--border); border-radius:8px; }
+  table { border-collapse: collapse; width: 100%; min-width: 600px; }
+  th, td { border:1px solid var(--border); padding:6px; text-align:center; }
+  th { background: var(--soft1); position: sticky; top: 0; z-index: 2; }
+  th:first-child, td:first-child { position: sticky; left: 0; background:#fff; z-index: 3; text-align:left; min-width:150px; }
+  tr:nth-child(even) { background: #fdfdfe; }
+  tr:hover td { background: var(--soft2); }
+
+  .dow { font-size: 11px; color:#495057; }
+  .dateNum { font-weight: bold; }
+  .weekend { background: var(--soft3); }
+
+  .name-cell { display:flex; align-items:center; gap:8px; }
+  .name-cell input { flex:1; border:1px solid transparent; padding:4px; border-radius:6px; }
+  .name-cell input:focus { border-color: var(--accent); background: var(--muted); }
+  .del { background:#ffe3e3; border:1px solid #ffc9c9; color:#c92a2a; }
+  .del:hover { background:#ffa8a8; }
+
+  .footer { margin-top: 12px; }
+  .counts { padding:8px 12px; border:1px solid var(--border); border-radius:8px; background: var(--muted); font-weight: 500; }
+
+  input[type="checkbox"] { transform: scale(1.2); }
+
+  @media (max-width: 768px) {
+    .bar, .controls { flex-direction: column; }
+    th:first-child, td:first-child { min-width: 120px; }
+  }
+  #filterStatus,#filterDay,#filterDay,#resetFilters{display:none;}
+</style>
+
+</head>
+<body>
+  <h1>Saraswati Classess</h1>
+  <div class="today" id="todayBar">—</div>
+
+  <div class="controls">
+    <input id="filterName" type="text" placeholder="Search by name…" />
+    <select id="filterDay"></select>
+    <select id="filterStatus">
+      <option value="any">Any status</option>
+      <option value="present">Present</option>
+      <option value="absent">Absent</option>
+    </select>
+    <button id="resetFilters">Reset Filters</button>
+  </div>
+
+  <div class="table-wrap">
+    <table id="attTable">
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+
+
+  <div class="bar">
+    <input id="studentName" type="text" placeholder="Add student name…" />
+    <button id="addStudent">Add Student</button>
+    <button id="exportBtn">Export JSON</button>
+    <input id="importFile" type="file" accept="application/json" style="display:none" />
+    <button id="importBtn">Import JSON</button>
+    <button id="clearBtn" class="del">Clear All</button>
+    <span class="pill" id="monthLabel"></span>
+  </div>
+
+
+  <div class="footer">
+    <div class="counts" id="countBox">Counting for — : Present 0 · Absent 0</div>
+  </div>
+
+<script>
+(function(){
+  const fmtToday = new Intl.DateTimeFormat(undefined, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const fmtMonth = new Intl.DateTimeFormat(undefined, { month:'long', year:'numeric' });
+  const fmtDow = new Intl.DateTimeFormat(undefined, { weekday:'short' });
+  const pad = n => String(n).padStart(2,'0');
+
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const visibleDays = today.getDate(); // limit to current day
+  const monthKey = `${year}-${pad(month+1)}`;
+
+  $('#todayBar').text(fmtToday.format(today));
+  $('#monthLabel').text(fmtMonth.format(new Date(year, month, 1)));
+
+  const LS_KEY = 'attendanceData-v1';
+  function loadAll(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)) || { months:{} }; }catch{ return { months:{} }; } }
+  function saveAll(data){ localStorage.setItem(LS_KEY, JSON.stringify(data)); }
+  function getMonthData(all){ if(!all.months[monthKey]) all.months[monthKey] = { students: [], marks: {} }; return all.months[monthKey]; }
+
+  const thead = document.getElementById('thead');
+  const tbody = document.getElementById('tbody');
+  let activeDate = new Date(year, month, today.getDate());
+
+  function buildHeader(){
+    const tr1 = document.createElement('tr');
+    const nameTh = document.createElement('th');
+    nameTh.textContent = 'Name';
+    tr1.appendChild(nameTh);
+
+    for(let d=1; d<=visibleDays; d++){
+      const dateObj = new Date(year, month, d);
+      const th = document.createElement('th');
+      th.dataset.date = isoDay(dateObj);
+      th.innerHTML = `<div class="dow">${fmtDow.format(dateObj)}</div><div class="dateNum">${d}</div>`;
+      if(dateObj.getDay() === 0 || dateObj.getDay() === 6) th.classList.add('weekend');
+      th.addEventListener('click', ()=>{ setActiveDate(dateObj); });
+      tr1.appendChild(th);
+    }
+
+    thead.innerHTML = '';
+    thead.appendChild(tr1);
+
+    const $day = $('#filterDay');
+    $day.empty().append(`<option value="all">All days</option>`);
+    for(let d=1; d<=visibleDays; d++){
+      const dateObj = new Date(year, month, d);
+      $day.append(`<option value="${isoDay(dateObj)}">${fmtDow.format(dateObj)} ${d}</option>`);
+    }
+  }
+
+  function buildBody(){
+    const all = loadAll();
+    const md = getMonthData(all);
+    tbody.innerHTML = '';
+    md.students.forEach(name => tbody.appendChild(buildRow(name, md)));
+    applyFilters();
+  }
+
+  function buildRow(name, md){
+    const tr = document.createElement('tr');
+    tr.dataset.name = name.toLowerCase();
+
+    const tdName = document.createElement('td');
+    tdName.className = 'name-cell';
+    const nameInput = document.createElement('input');
+    nameInput.value = name;
+    nameInput.addEventListener('change', () => renameStudent(name, nameInput.value));
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '🗑';
+    delBtn.className = 'del';
+    delBtn.addEventListener('click', () => removeStudent(name));
+    tdName.appendChild(nameInput);
+    tdName.appendChild(delBtn);
+    tr.appendChild(tdName);
+
+    for(let d=1; d<=visibleDays; d++){
+      const dateObj = new Date(year, month, d);
+      const iso = isoDay(dateObj);
+      const td = document.createElement('td');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !!(md.marks[name] && md.marks[name][iso]);
+      cb.addEventListener('change', ()=>{
+        setMark(name, iso, cb.checked);
+        if(iso === isoDay(activeDate)) updateCounts();
+      });
+      td.appendChild(cb);
+      tr.appendChild(td);
+    }
+    return tr;
+  }
+
+  function isoDay(dateObj){ return `${dateObj.getFullYear()}-${pad(dateObj.getMonth()+1)}-${pad(dateObj.getDate())}`; }
+
+  function addStudent(name){
+    name = (name||'').trim();
+    if(!name) return;
+    const all = loadAll();
+    const md = getMonthData(all);
+    if(md.students.includes(name)) return;
+    md.students.push(name);
+    md.marks[name] = {};
+    saveAll(all);
+    buildBody();
+    updateCounts();
+  }
+
+  function removeStudent(name){
+    const all = loadAll();
+    const md = getMonthData(all);
+    md.students = md.students.filter(n => n !== name);
+    delete md.marks[name];
+    saveAll(all);
+    buildBody();
+    updateCounts();
+  }
+
+  function renameStudent(oldName, newName){
+    newName = (newName||'').trim();
+    if(!newName || newName === oldName) return;
+    const all = loadAll();
+    const md = getMonthData(all);
+    if(md.students.includes(newName)) return alert('Name exists');
+    md.students[md.students.indexOf(oldName)] = newName;
+    md.marks[newName] = md.marks[oldName] || {};
+    delete md.marks[oldName];
+    saveAll(all);
+    buildBody();
+    updateCounts();
+  }
+
+  function setMark(name, iso, present){
+    const all = loadAll();
+    const md = getMonthData(all);
+    md.marks[name] = md.marks[name] || {};
+    md.marks[name][iso] = present;
+    saveAll(all);
+  }
+
+  function setActiveDate(dateObj){
+    activeDate = dateObj;
+    updateCounts();
+  }
+
+  function updateCounts(){
+    const all = loadAll();
+    const md = getMonthData(all);
+    const iso = isoDay(activeDate);
+    const $rows = $(tbody).find('tr:visible');
+    let present = 0;
+    $rows.each(function(){
+      const name = $(this).find('.name-cell input').val();
+      if(md.marks[name] && md.marks[name][iso]) present++;
+    });
+    $('#countBox').text(`Counting for ${iso}: Present ${present} · Absent ${$rows.length - present}`);
+  }
+
+  function applyFilters(){
+    const q = $('#filterName').val()?.toLowerCase() || '';
+    $(tbody).find('tr').each(function(){
+      const $row = $(this);
+      const name = $row.data('name');
+      $row.toggle(!q || name.includes(q));
+    });
+    updateCounts();
+  }
+
+  $('#addStudent').click(()=> addStudent($('#studentName').val()));
+  $('#filterName').on('input', applyFilters);
+  $('#exportBtn').click(()=>{
+    const blob = new Blob([JSON.stringify(loadAll(), null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `attendance_${Date.now()}.json`;
+    a.click();
+  });
+
+  buildHeader();
+  buildBody();
+})();
+</script>
+</body>
+</html>
