@@ -1,276 +1,687 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title style="text-align:center">Saraswati Classess</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<style>
-  :root { --accent: #6c5ce7; --muted:#f8f9fa; --border:#dee2e6; --soft1:#dfe7fd; --soft2:#e0f7fa; --soft3:#fff3cd; }
-  * { box-sizing: border-box; }
-  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 16px; background:#fff; color:#212529; }
-  h1 { margin: 0 0 8px; font-size: 24px; color: var(--accent); }
-  .today { font-weight: 600; margin-bottom: 12px; }
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title style="text-align:center">Saraswati Classess</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        :root {
+            --accent: #6c5ce7;
+            --muted: #f8f9fa;
+            --border: #dee2e6;
+            --soft1: #eef1ff;
+            --soft2: #eef9ff;
+            --soft3: #fff3cd
+        }
 
-  .bar, .controls { display: flex; flex-wrap: wrap; gap:8px; margin: 8px 0; }
-  .bar input, .controls input, .controls select { padding:8px 10px; border:1px solid var(--border); border-radius:8px; }
-  .bar button, .controls button, .pill { padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:#fff; cursor:pointer; transition: background 0.2s; }
-  .bar button:hover, .controls button:hover { background: var(--soft2); }
-  .pill { background: var(--muted); }
+        * {
+            box-sizing: border-box
+        }
 
-  .table-wrap { overflow:auto; border:1px solid var(--border); border-radius:8px; }
-  table { border-collapse: collapse; width: 100%; min-width: 600px; }
-  th, td { border:1px solid var(--border); padding:6px; text-align:center; }
-  th { background: var(--soft1); position: sticky; top: 0; z-index: 2; }
-  th:first-child, td:first-child { position: sticky; left: 0; background:#fff; z-index: 3; text-align:left; min-width:150px; }
-  tr:nth-child(even) { background: #fdfdfe; }
-  tr:hover td { background: var(--soft2); }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 16px;
+            background: #fff;
+            color: #212529;
+            line-height: 1.4
+        }
 
-  .dow { font-size: 11px; color:#495057; }
-  .dateNum { font-weight: bold; }
-  .weekend { background: var(--soft3); }
+        h1 {
+            margin: 0 0 8px;
+            font-size: 24px;
+            color: var(--accent)
+        }
 
-  .name-cell { display:flex; align-items:center; gap:8px; }
-  .name-cell input { flex:1; border:1px solid transparent; padding:4px; border-radius:6px; }
-  .name-cell input:focus { border-color: var(--accent); background: var(--muted); }
-  .del { background:#ffe3e3; border:1px solid #ffc9c9; color:#c92a2a; }
-  .del:hover { background:#ffa8a8; }
+        .today {
+            font-weight: 600;
+            margin-bottom: 12px
+        }
 
-  .footer { margin-top: 12px; }
-  .counts { padding:8px 12px; border:1px solid var(--border); border-radius:8px; background: var(--muted); font-weight: 500; }
+        /* top bar */
+        .bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0
+        }
 
-  input[type="checkbox"] { transform: scale(1.2); }
+        .bar input {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px
+        }
 
-  @media (max-width: 768px) {
-    .bar, .controls { flex-direction: column; }
-    th:first-child, td:first-child { min-width: 120px; }
-  }
-  #filterStatus,#filterDay,#filterDay,#resetFilters{display:none;}
-</style>
+        .bar button, .pill {
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer
+        }
 
+        .bar button:hover {
+            background: var(--soft2)
+        }
+
+        .pill {
+            background: var(--muted)
+        }
+
+        /* table */
+        .table-wrap {
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 12px
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 640px
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 8px;
+            text-align: center
+        }
+
+        th {
+            background: var(--soft1);
+            position: sticky;
+            top: 0;
+            z-index: 2
+        }
+
+        th:first-child, td:first-child {
+            position: sticky;
+            left: 0;
+            background: #fff;
+            z-index: 3;
+            text-align: left;
+            width: 1%;
+            min-width: 120px;
+            white-space: nowrap
+        }
+
+        .dow {
+            font-size: 11px;
+            color: #495057
+        }
+
+        .dateNum {
+            font-weight: 700
+        }
+
+        .weekend {
+            background: var(--soft3)
+        }
+
+        .name-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .name-cell input {
+            width: auto;
+            min-width: 8ch;
+            max-width: 26ch;
+            border: 1px solid transparent;
+            padding: 6px;
+            border-radius: 8px
+        }
+
+        .name-cell input:focus {
+            border-color: var(--accent);
+            background: var(--muted)
+        }
+
+        .del {
+            background: #ffe3e3;
+            border: 1px solid #ffc9c9;
+            color: #c92a2a
+        }
+
+        .del:hover {
+            background: #ffa8a8
+        }
+
+        .footer {
+            margin-top: 12px
+        }
+
+        .counts {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--muted);
+            font-weight: 600
+        }
+
+        input[type="checkbox"] {
+            transform: scale(1.15)
+        }
+
+        /* ===== Mobile: stack a row into a card, day label + checkbox inline ===== */
+        /* Hide toggle by default */
+        .toggle {
+            display: none;
+        }
+
+        /* Show toggle only on mobile (≤ 680px) */
+        @media (max-width: 680px) {
+            .toggle {
+                display: inline-block;
+            }
+
+            .table-wrap {
+                border: none
+            }
+
+            table, thead, tbody, th, td, tr {
+                display: block
+            }
+
+            thead {
+                display: none
+            }
+
+            tr {
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                margin: 12px 0;
+                padding: 8px;
+                background: #fff
+            }
+
+            /* Name row */
+            td.name-col {
+                border: none;
+                border-bottom: 1px solid var(--border);
+                padding: 10px 6px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between
+            }
+
+            /* Day rows: label + checkbox side-by-side, left-aligned */
+            td {
+                border: none;
+                border-bottom: 1px solid var(--border);
+                padding: 10px 6px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                justify-content: flex-start
+            }
+
+            td:last-child {
+                border-bottom: none
+            }
+
+            th:first-child, td:first-child {
+                position: static;
+                left: auto;
+                min-width: auto;
+                width: auto;
+                white-space: normal
+            }
+
+            .cell-label {
+                font-size: 14px;
+                color: #495057;
+                min-width: auto
+            }
+
+            .cell-content {
+                display: flex;
+                align-items: center;
+                justify-content: flex-start
+            }
+        }
+
+        /* ===== Modal ===== */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            max-width: 520px;
+            width: 100%;
+            padding: 16px
+        }
+
+        .modal h3 {
+            margin: 0 0 12px;
+            font-size: 18px
+        }
+
+        .modal .row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px
+        }
+
+        .modal input, .modal select {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px
+        }
+
+        .modal .actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: #fff
+        }
+
+        .btn-ghost {
+            background: #fff
+        }
+
+
+        /* Collapse/expand */
+        tr.collapsed td:not(.name-col) {
+            display: none;
+        }
+
+        .toggle {
+            border: 1px solid var(--border);
+            background: #fff;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+
+        .toggle:after {
+            content: "-";
+            font-size: 12px;
+        }
+
+        tr.collapsed .toggle:after {
+            content: "+";
+        }
+
+
+    </style>
 </head>
 <body>
-  <h1>Saraswati Classess</h1>
-  <div class="today" id="todayBar">—</div>
+<h1>Saraswati Classess</h1>
+<div class="today" id="todayBar">—</div>
 
-  <div class="controls">
-    <input id="filterName" type="text" placeholder="Search by name…" />
-    <select id="filterDay"></select>
-    <select id="filterStatus">
-      <option value="any">Any status</option>
-      <option value="present">Present</option>
-      <option value="absent">Absent</option>
-    </select>
-    <button id="resetFilters">Reset Filters</button>
-  </div>
-
-  <div class="table-wrap">
-    <table id="attTable">
-      <thead id="thead"></thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
-
-
-
-  <div class="bar">
-    <input id="studentName" type="text" placeholder="Add student name…" />
+<div class="bar">
+    <input id="studentName" type="text" placeholder="Add student name…"/>
     <button id="addStudent">Add Student</button>
     <button id="exportBtn">Export JSON</button>
-    <input id="importFile" type="file" accept="application/json" style="display:none" />
+    <input id="importFile" type="file" accept="application/json" style="display:none"/>
     <button id="importBtn">Import JSON</button>
+    <button id="openFilters">Filters</button>
     <button id="clearBtn" class="del">Clear All</button>
     <span class="pill" id="monthLabel"></span>
-  </div>
+</div>
 
+<div class="table-wrap">
+    <table id="attTable">
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+    </table>
+</div>
 
-  <div class="footer">
+<div class="footer">
     <div class="counts" id="countBox">Counting for — : Present 0 · Absent 0</div>
-  </div>
+</div>
+
+<!-- Filters Modal -->
+<div class="modal-backdrop" id="filtersModal">
+    <div class="modal">
+        <h3>Filters</h3>
+        <div class="row"><input id="filterName" type="text" placeholder="Search by name…"></div>
+        <div class="row"><select id="filterDay"></select></div>
+        <div class="row"><select id="filterStatus">
+            <option value="any">Any status</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+        </select></div>
+        <div class="actions">
+            <button class="btn-ghost" id="resetFilters">Reset</button>
+            <button class="btn-primary" id="applyFilters">Apply</button>
+            <button class="btn-ghost" id="closeFilters">Close</button>
+        </div>
+    </div>
+</div>
 
 <script>
-(function(){
-  const fmtToday = new Intl.DateTimeFormat(undefined, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  const fmtMonth = new Intl.DateTimeFormat(undefined, { month:'long', year:'numeric' });
-  const fmtDow = new Intl.DateTimeFormat(undefined, { weekday:'short' });
-  const pad = n => String(n).padStart(2,'0');
+    (function () {
+        const fmtToday = new Intl.DateTimeFormat(undefined, {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        const fmtMonth = new Intl.DateTimeFormat(undefined, {month: 'long', year: 'numeric'});
+        const fmtDow = new Intl.DateTimeFormat(undefined, {weekday: 'short'});
+        const pad = n => String(n).padStart(2, '0');
 
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
-  const daysInMonth = new Date(year, month+1, 0).getDate();
-  const visibleDays = today.getDate(); // limit to current day
-  const monthKey = `${year}-${pad(month+1)}`;
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const visibleDays = today.getDate(); // only up to current day
+        const monthKey = `${year}-${pad(month + 1)}`;
 
-  $('#todayBar').text(fmtToday.format(today));
-  $('#monthLabel').text(fmtMonth.format(new Date(year, month, 1)));
+        $('#todayBar').text(fmtToday.format(today));
+        $('#monthLabel').text(fmtMonth.format(new Date(year, month, 1)));
 
-  const LS_KEY = 'attendanceData-v1';
-  function loadAll(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)) || { months:{} }; }catch{ return { months:{} }; } }
-  function saveAll(data){ localStorage.setItem(LS_KEY, JSON.stringify(data)); }
-  function getMonthData(all){ if(!all.months[monthKey]) all.months[monthKey] = { students: [], marks: {} }; return all.months[monthKey]; }
+        const LS_KEY = 'attendanceData-v1';
 
-  const thead = document.getElementById('thead');
-  const tbody = document.getElementById('tbody');
-  let activeDate = new Date(year, month, today.getDate());
+        function loadAll() {
+            try {
+                return JSON.parse(localStorage.getItem(LS_KEY)) || {months: {}}
+            } catch {
+                return {months: {}}
+            }
+        }
 
-  function buildHeader(){
-    const tr1 = document.createElement('tr');
-    const nameTh = document.createElement('th');
-    nameTh.textContent = 'Name';
-    tr1.appendChild(nameTh);
+        function saveAll(d) {
+            localStorage.setItem(LS_KEY, JSON.stringify(d));
+        }
 
-    for(let d=1; d<=visibleDays; d++){
-      const dateObj = new Date(year, month, d);
-      const th = document.createElement('th');
-      th.dataset.date = isoDay(dateObj);
-      th.innerHTML = `<div class="dow">${fmtDow.format(dateObj)}</div><div class="dateNum">${d}</div>`;
-      if(dateObj.getDay() === 0 || dateObj.getDay() === 6) th.classList.add('weekend');
-      th.addEventListener('click', ()=>{ setActiveDate(dateObj); });
-      tr1.appendChild(th);
-    }
+        function getMonthData(all) {
+            if (!all.months[monthKey]) all.months[monthKey] = {students: [], marks: {}};
+            return all.months[monthKey];
+        }
 
-    thead.innerHTML = '';
-    thead.appendChild(tr1);
+        const thead = document.getElementById('thead');
+        const tbody = document.getElementById('tbody');
+        let activeDate = new Date(year, month, today.getDate());
 
-    const $day = $('#filterDay');
-    $day.empty().append(`<option value="all">All days</option>`);
-    for(let d=1; d<=visibleDays; d++){
-      const dateObj = new Date(year, month, d);
-      $day.append(`<option value="${isoDay(dateObj)}">${fmtDow.format(dateObj)} ${d}</option>`);
-    }
-  }
+        function buildHeader() {
+            const tr = document.createElement('tr');
+            const nameTh = document.createElement('th');
+            nameTh.textContent = 'Name';
+            tr.appendChild(nameTh);
 
-  function buildBody(){
-    const all = loadAll();
-    const md = getMonthData(all);
-    tbody.innerHTML = '';
-    md.students.forEach(name => tbody.appendChild(buildRow(name, md)));
-    applyFilters();
-  }
+            for (let d = 1; d <= visibleDays; d++) {
+                const dateObj = new Date(year, month, d);
+                const th = document.createElement('th');
+                th.dataset.date = isoDay(dateObj);
+                th.innerHTML = `<div class="dow">${fmtDow.format(dateObj)}</div><div class="dateNum">${d}</div>`;
+                if (dateObj.getDay() === 0 || dateObj.getDay() === 6) th.classList.add('weekend');
+                th.title = th.dataset.date;
+                th.addEventListener('click', () => setActiveDate(dateObj));
+                tr.appendChild(th);
+            }
 
-  function buildRow(name, md){
-    const tr = document.createElement('tr');
-    tr.dataset.name = name.toLowerCase();
+            thead.innerHTML = '';
+            thead.appendChild(tr);
 
-    const tdName = document.createElement('td');
-    tdName.className = 'name-cell';
-    const nameInput = document.createElement('input');
-    nameInput.value = name;
-    nameInput.addEventListener('change', () => renameStudent(name, nameInput.value));
-    const delBtn = document.createElement('button');
-    delBtn.textContent = '🗑';
-    delBtn.className = 'del';
-    delBtn.addEventListener('click', () => removeStudent(name));
-    tdName.appendChild(nameInput);
-    tdName.appendChild(delBtn);
-    tr.appendChild(tdName);
+            // Fill modal day dropdown
+            const $day = $('#filterDay');
+            $day.empty().append(`<option value="all">All days</option>`);
+            for (let d = 1; d <= visibleDays; d++) {
+                const dateObj = new Date(year, month, d);
+                $day.append(`<option value="${isoDay(dateObj)}">${fmtDow.format(dateObj)} ${d}</option>`);
+            }
+        }
 
-    for(let d=1; d<=visibleDays; d++){
-      const dateObj = new Date(year, month, d);
-      const iso = isoDay(dateObj);
-      const td = document.createElement('td');
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.checked = !!(md.marks[name] && md.marks[name][iso]);
-      cb.addEventListener('change', ()=>{
-        setMark(name, iso, cb.checked);
-        if(iso === isoDay(activeDate)) updateCounts();
-      });
-      td.appendChild(cb);
-      tr.appendChild(td);
-    }
-    return tr;
-  }
+        function buildBody() {
+            const all = loadAll();
+            const md = getMonthData(all);
+            tbody.innerHTML = '';
+            md.students.forEach(name => tbody.appendChild(buildRow(name, md)));
+            applyFilters();
+        }
 
-  function isoDay(dateObj){ return `${dateObj.getFullYear()}-${pad(dateObj.getMonth()+1)}-${pad(dateObj.getDate())}`; }
+        function buildRow(name, md) {
+            const tr = document.createElement('tr');
+            tr.dataset.name = name.toLowerCase();
 
-  function addStudent(name){
-    name = (name||'').trim();
-    if(!name) return;
-    const all = loadAll();
-    const md = getMonthData(all);
-    if(md.students.includes(name)) return;
-    md.students.push(name);
-    md.marks[name] = {};
-    saveAll(all);
-    buildBody();
-    updateCounts();
-  }
+            // name cell
+            const tdName = document.createElement('td');
+            tdName.className = 'name-cell name-col';
 
-  function removeStudent(name){
-    const all = loadAll();
-    const md = getMonthData(all);
-    md.students = md.students.filter(n => n !== name);
-    delete md.marks[name];
-    saveAll(all);
-    buildBody();
-    updateCounts();
-  }
+// NEW: toggle button
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'toggle';
+            toggle.title = 'Expand/Collapse';
+            tdName.appendChild(toggle);
 
-  function renameStudent(oldName, newName){
-    newName = (newName||'').trim();
-    if(!newName || newName === oldName) return;
-    const all = loadAll();
-    const md = getMonthData(all);
-    if(md.students.includes(newName)) return alert('Name exists');
-    md.students[md.students.indexOf(oldName)] = newName;
-    md.marks[newName] = md.marks[oldName] || {};
-    delete md.marks[oldName];
-    saveAll(all);
-    buildBody();
-    updateCounts();
-  }
+            tdName.className = 'name-cell name-col';
+            const inp = document.createElement('input');
+            inp.value = name;
+            inp.addEventListener('change', () => renameStudent(name, inp.value));
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '🗑';
+            delBtn.className = 'del';
+            delBtn.addEventListener('click', () => removeStudent(name));
+            tdName.appendChild(inp);
+            tdName.appendChild(delBtn);
+            tr.appendChild(tdName);
 
-  function setMark(name, iso, present){
-    const all = loadAll();
-    const md = getMonthData(all);
-    md.marks[name] = md.marks[name] || {};
-    md.marks[name][iso] = present;
-    saveAll(all);
-  }
 
-  function setActiveDate(dateObj){
-    activeDate = dateObj;
-    updateCounts();
-  }
+// Click to toggle collapse
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                tr.classList.toggle('collapsed');
+            });
 
-  function updateCounts(){
-    const all = loadAll();
-    const md = getMonthData(all);
-    const iso = isoDay(activeDate);
-    const $rows = $(tbody).find('tr:visible');
-    let present = 0;
-    $rows.each(function(){
-      const name = $(this).find('.name-cell input').val();
-      if(md.marks[name] && md.marks[name][iso]) present++;
-    });
-    $('#countBox').text(`Counting for ${iso}: Present ${present} · Absent ${$rows.length - present}`);
-  }
+// Default: collapsed on small screens, expanded on desktop
+            if (window.innerWidth <= 680) {
+                tr.classList.add('collapsed');
+            }
 
-  function applyFilters(){
-    const q = $('#filterName').val()?.toLowerCase() || '';
-    $(tbody).find('tr').each(function(){
-      const $row = $(this);
-      const name = $row.data('name');
-      $row.toggle(!q || name.includes(q));
-    });
-    updateCounts();
-  }
+            // day cells
+            for (let d = 1; d <= visibleDays; d++) {
+                const dateObj = new Date(year, month, d);
+                const iso = isoDay(dateObj);
+                const td = document.createElement('td');
+                td.className = 'm-row';
+                td.setAttribute('data-label', `${fmtDow.format(dateObj)} ${d}`);
 
-  $('#addStudent').click(()=> addStudent($('#studentName').val()));
-  $('#filterName').on('input', applyFilters);
-  $('#exportBtn').click(()=>{
-    const blob = new Blob([JSON.stringify(loadAll(), null, 2)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `attendance_${Date.now()}.json`;
-    a.click();
-  });
+                const label = document.createElement('span');
+                label.className = 'cell-label';
+                label.textContent = `${fmtDow.format(dateObj)} ${d}`;
 
-  buildHeader();
-  buildBody();
-})();
+                const content = document.createElement('span');
+                content.className = 'cell-content';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = !!(md.marks[name] && md.marks[name][iso]);
+                cb.addEventListener('change', () => {
+                    setMark(name, iso, cb.checked);
+                    if (iso === isoDay(activeDate)) updateCounts();
+                });
+
+                content.appendChild(cb);
+                td.appendChild(label);
+                td.appendChild(content);
+                tr.appendChild(td);
+
+                // Click to toggle collapse
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    tr.classList.toggle('collapsed');
+                });
+
+// Default: collapsed on small screens, expanded on desktop
+                if (window.innerWidth <= 680) {
+                    tr.classList.add('collapsed');
+                }
+            }
+
+            return tr;
+        }
+
+        function isoDay(d) {
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        }
+
+        function addStudent(name) {
+            name = (name || '').trim();
+            if (!name) return;
+            const all = loadAll();
+            const md = getMonthData(all);
+            if (md.students.includes(name)) return;
+            md.students.push(name);
+            md.marks[name] = {};
+            saveAll(all);
+            buildBody();
+            updateCounts();
+        }
+
+        function removeStudent(name) {
+            const all = loadAll();
+            const md = getMonthData(all);
+            md.students = md.students.filter(n => n !== name);
+            delete md.marks[name];
+            saveAll(all);
+            buildBody();
+            updateCounts();
+        }
+
+        function renameStudent(oldName, newName) {
+            newName = (newName || '').trim();
+            if (!newName || newName === oldName) return;
+            const all = loadAll();
+            const md = getMonthData(all);
+            if (md.students.includes(newName)) {
+                alert('Name exists');
+                return;
+            }
+            md.students[md.students.indexOf(oldName)] = newName;
+            md.marks[newName] = md.marks[oldName] || {};
+            delete md.marks[oldName];
+            saveAll(all);
+            buildBody();
+            updateCounts();
+        }
+
+        function setMark(name, iso, present) {
+            const all = loadAll();
+            const md = getMonthData(all);
+            md.marks[name] = md.marks[name] || {};
+            md.marks[name][iso] = present;
+            saveAll(all);
+        }
+
+        function setActiveDate(d) {
+            activeDate = d;
+            updateCounts();
+        }
+
+        function updateCounts() {
+            const all = loadAll();
+            const md = getMonthData(all);
+            const iso = isoDay(activeDate);
+            const $rows = $(tbody).find('tr:visible');
+            let present = 0;
+            $rows.each(function () {
+                const name = $(this).find('.name-cell input').val();
+                if (md.marks[name] && md.marks[name][iso]) present++;
+            });
+            $('#countBox').text(`Counting for ${iso}: Present ${present} · Absent ${$rows.length - present}`);
+        }
+
+        // Filters (modal)
+        function applyFilters() {
+            const q = $('#filterName').val()?.toLowerCase() || '';
+            const day = $('#filterDay').val();
+            const status = $('#filterStatus').val();
+            $(tbody).find('tr').each(function () {
+                const $row = $(this);
+                const name = ($row.data('name') || '').toString();
+                let visible = true;
+                if (q && !name.includes(q)) visible = false;
+                if (visible && day && day !== 'all') {
+                    const idx = [...thead.querySelector('tr').children].findIndex(th => th.dataset.date === day);
+                    if (idx > 0) {
+                        const cbCell = $row[0].cells[idx];
+                        const cb = cbCell ? cbCell.querySelector('input[type="checkbox"]') : null;
+                        const present = cb && cb.checked;
+                        if (status === 'present' && !present) visible = false;
+                        if (status === 'absent' && present) visible = false;
+                    }
+                }
+                $row.toggle(visible);
+            });
+            updateCounts();
+        }
+
+        // Make day line tappable on mobile
+        $(document).on('click', 'td.m-row', function (e) {
+            const cb = $(this).find('input[type="checkbox"]')[0];
+            if (!cb) return;
+            if (e.target !== cb) cb.click();
+        });
+
+        // Wire up
+        $('#addStudent').on('click', () => {
+            addStudent($('#studentName').val());
+            $('#studentName').val('');
+        });
+        $('#exportBtn').on('click', () => {
+            const blob = new Blob([JSON.stringify(loadAll(), null, 2)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `attendance_${Date.now()}.json`;
+            a.click();
+        });
+        $('#importBtn').on('click', () => $('#importFile').click());
+        $('#importFile').on('change', e => {
+            const f = e.target.files[0];
+            if (!f) return;
+            const r = new FileReader();
+            r.onload = ev => {
+                try {
+                    const parsed = JSON.parse(ev.target.result);
+                    localStorage.setItem(LS_KEY, JSON.stringify(parsed));
+                    buildHeader();
+                    buildBody();
+                    updateCounts();
+                    alert('Import successful.');
+                } catch (err) {
+                    alert('Import failed: ' + err.message);
+                }
+            };
+            r.readAsText(f);
+        });
+
+        // Modal open/close
+        $('#openFilters').on('click', () => $('#filtersModal').css('display', 'flex'));
+        $('#closeFilters').on('click', () => $('#filtersModal').hide());
+        $('#applyFilters').on('click', () => {
+            applyFilters();
+            $('#filtersModal').hide();
+        });
+        $('#resetFilters').on('click', () => {
+            $('#filterName').val('');
+            $('#filterDay').val('all');
+            $('#filterStatus').val('any');
+            applyFilters();
+        });
+
+        // init
+        buildHeader();
+        buildBody();
+    })();
 </script>
 </body>
 </html>
