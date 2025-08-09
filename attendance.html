@@ -52,7 +52,7 @@
             border-radius: 10px
         }
 
-        .bar button, .pill {
+        .bar button, .pill, button {
             padding: 10px 14px;
             border-radius: 10px;
             border: 1px solid var(--border);
@@ -164,13 +164,54 @@
             transform: scale(1.15)
         }
 
-        /* ===== Mobile: stack a row into a card, day label + checkbox inline ===== */
-        /* Hide toggle by default */
+        /* Hide toggle by default (desktop) */
         .toggle {
             display: none;
         }
 
-        /* Show toggle only on mobile (≤ 680px) */
+        /* Inline day label is hidden on desktop; shown on mobile */
+        .cell-label {
+            display: none;
+        }
+
+        /* ===== Mobile: stack a row into a card, day label + checkbox inline ===== */
+        @media (min-width: 680px) {
+
+            /* Sticky first column without weird width constraints */
+            th:first-child, td:first-child {
+                position: sticky;
+                left: 0;
+                background: #fff;
+                z-index: 3;
+                text-align: left;
+                /* remove width:1% and min-width:120px */
+                /* keep white-space only if you truly want no wrap */
+                white-space: nowrap;
+            }
+
+            /* Give the first column a sensible width (optional) */
+            td.name-col, th:first-child {
+                width: 240px; /* pick what you like, or omit to auto-size */
+            }
+
+            /* Make content stretch so there’s no “gap” */
+            .name-cell {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .name-cell input {
+                flex: 1 1 auto; /* fills the remaining space */
+                min-width: 0; /* prevents overflow */
+            }
+
+            .del {
+                margin-left: auto; /* parks delete button at the far right */
+            }
+        }
+
         @media (max-width: 680px) {
             .toggle {
                 display: inline-block;
@@ -206,7 +247,7 @@
                 justify-content: space-between
             }
 
-            /* Day rows: label + checkbox side-by-side, left-aligned */
+            /* Day rows: label left, checkbox right */
             td {
                 border: none;
                 border-bottom: 1px solid var(--border);
@@ -214,7 +255,23 @@
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                justify-content: flex-start
+            }
+
+            .cell-label {
+                display: block;
+                font-size: 14px;
+                color: #495057;
+            }
+
+            .cell-content {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                flex: 0 0 auto; /* don't let it shrink away */
+            }
+
+            .cell-content input[type="checkbox"] {
+                transform: scale(1.15);
             }
 
             td:last-child {
@@ -229,23 +286,13 @@
                 white-space: normal
             }
 
-            .cell-label {
-                font-size: 14px;
-                color: #495057;
-                min-width: auto
-            }
-
-            .cell-content {
-                display: flex;
-                align-items: center;
-                justify-content: flex-start
-            }
         }
 
         /* ===== Modal ===== */
         .modal-backdrop {
             position: fixed;
             inset: 0;
+            z-index: 9999;
             background: rgba(0, 0, 0, .45);
             display: none;
             align-items: center;
@@ -296,8 +343,7 @@
             background: #fff
         }
 
-
-        /* Collapse/expand */
+        /* Collapse/expand rows */
         tr.collapsed td:not(.name-col) {
             display: none;
         }
@@ -319,8 +365,6 @@
         tr.collapsed .toggle:after {
             content: "+";
         }
-
-
     </style>
 </head>
 <body>
@@ -330,12 +374,8 @@
 <div class="bar">
     <input id="studentName" type="text" placeholder="Add student name…"/>
     <button id="addStudent">Add Student</button>
-    <button id="exportBtn">Export JSON</button>
-    <input id="importFile" type="file" accept="application/json" style="display:none"/>
-    <button id="importBtn">Import JSON</button>
-    <button id="openFilters">Filters</button>
-    <button id="clearBtn" class="del">Clear All</button>
-    <span class="pill" id="monthLabel"></span>
+    <!-- Filters Modal -->
+    <button id="openFilters">Tools</button>
 </div>
 
 <div class="table-wrap">
@@ -349,17 +389,25 @@
     <div class="counts" id="countBox">Counting for — : Present 0 · Absent 0</div>
 </div>
 
-<!-- Filters Modal -->
 <div class="modal-backdrop" id="filtersModal">
     <div class="modal">
         <h3>Filters</h3>
+        <div class="row">
+            <button id="exportBtn">Export JSON</button>
+            <input id="importFile" type="file" accept="application/json" style="display:none"/>
+            <button id="importBtn">Import JSON</button>
+            <button id="clearBtn" class="del">Clear All</button>
+            <span class="pill" id="monthLabel"></span>
+        </div>
         <div class="row"><input id="filterName" type="text" placeholder="Search by name…"></div>
         <div class="row"><select id="filterDay"></select></div>
-        <div class="row"><select id="filterStatus">
-            <option value="any">Any status</option>
-            <option value="present">Present</option>
-            <option value="absent">Absent</option>
-        </select></div>
+        <div class="row">
+            <select id="filterStatus">
+                <option value="any">Any status</option>
+                <option value="present">Present</option>
+                <option value="absent">Absent</option>
+            </select>
+        </div>
         <div class="actions">
             <button class="btn-ghost" id="resetFilters">Reset</button>
             <button class="btn-primary" id="applyFilters">Apply</button>
@@ -371,10 +419,7 @@
 <script>
     (function () {
         const fmtToday = new Intl.DateTimeFormat(undefined, {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
         });
         const fmtMonth = new Intl.DateTimeFormat(undefined, {month: 'long', year: 'numeric'});
         const fmtDow = new Intl.DateTimeFormat(undefined, {weekday: 'short'});
@@ -457,41 +502,38 @@
             const tdName = document.createElement('td');
             tdName.className = 'name-cell name-col';
 
-// NEW: toggle button
+            // per-row toggle (mobile only via CSS)
             const toggle = document.createElement('button');
             toggle.type = 'button';
             toggle.className = 'toggle';
             toggle.title = 'Expand/Collapse';
-            tdName.appendChild(toggle);
-
-            tdName.className = 'name-cell name-col';
-            const inp = document.createElement('input');
-            inp.value = name;
-            inp.addEventListener('change', () => renameStudent(name, inp.value));
-            const delBtn = document.createElement('button');
-            delBtn.textContent = '🗑';
-            delBtn.className = 'del';
-            delBtn.addEventListener('click', () => removeStudent(name));
-            tdName.appendChild(inp);
-            tdName.appendChild(delBtn);
-            tr.appendChild(tdName);
-
-
-// Click to toggle collapse
             toggle.addEventListener('click', (e) => {
                 e.stopPropagation();
                 tr.classList.toggle('collapsed');
             });
+            tdName.appendChild(toggle);
 
-// Default: collapsed on small screens, expanded on desktop
-            if (window.innerWidth <= 680) {
-                tr.classList.add('collapsed');
-            }
+            const inp = document.createElement('input');
+            inp.value = name;
+            inp.addEventListener('change', () => renameStudent(name, inp.value));
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '🗑';
+            delBtn.className = 'del';
+            delBtn.addEventListener('click', () => removeStudent(name));
+
+            tdName.appendChild(inp);
+            tdName.appendChild(delBtn);
+            tr.appendChild(tdName);
+
+            // Default: collapsed on small screens, expanded on desktop
+            if (window.innerWidth <= 680) tr.classList.add('collapsed');
 
             // day cells
             for (let d = 1; d <= visibleDays; d++) {
                 const dateObj = new Date(year, month, d);
                 const iso = isoDay(dateObj);
+
                 const td = document.createElement('td');
                 td.className = 'm-row';
                 td.setAttribute('data-label', `${fmtDow.format(dateObj)} ${d}`);
@@ -502,6 +544,7 @@
 
                 const content = document.createElement('span');
                 content.className = 'cell-content';
+
                 const cb = document.createElement('input');
                 cb.type = 'checkbox';
                 cb.checked = !!(md.marks[name] && md.marks[name][iso]);
@@ -514,17 +557,6 @@
                 td.appendChild(label);
                 td.appendChild(content);
                 tr.appendChild(td);
-
-                // Click to toggle collapse
-                toggle.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    tr.classList.toggle('collapsed');
-                });
-
-// Default: collapsed on small screens, expanded on desktop
-                if (window.innerWidth <= 680) {
-                    tr.classList.add('collapsed');
-                }
             }
 
             return tr;
