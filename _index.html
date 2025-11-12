@@ -1,0 +1,303 @@
+You are a technical documentation assistant.
+
+I am working on a Principal internal project called "api-service".
+This is not a deployable application — it is a reusable **pattern template** repository that should be **registered in the Principal Developer Portal (PDP)** marketplace.
+
+Here is the full context:
+
+- The api-service repository acts as a **starter pattern** for creating backend services.
+- It uses **AWS Lambda, API Gateway, DynamoDB, EventBridge, and AWS CDK**.
+- It does not define infra directly; instead, it imports **shared CDK constructs** from another internal repo that encapsulates common AWS resource provisioning.
+- It includes **GitHub Actions workflows** for build, test, and deploy.
+- The repo provides **example Lambda handlers** such as:
+- health-check-handler.ts (verifies service health and DynamoDB connection)
+- example-api-service-handler.ts (sample API using pfLogger + X-Ray)
+- event-listener-handler.ts (handles incoming SNS/EventBridge messages)
+- event-publication-utils.ts (implements Outbox pattern for reliable event publishing)
+- example-api-service-event-handler.ts (publishes events via the utility)
+- ddb-event-broker-handler.ts (listens to DynamoDB Streams and forwards to EventBridge)
+- appconfig-client.ts (fetches feature flags via AWS AppConfig)
+- failover-check-handler.ts (checks DR failover readiness)
+- The repo structure includes /app, /infrastructure, /test, and .github/workflows folders.
+- Infrastructure folder defines a CDK app that references shared constructs to create Lambdas, API Gateway, DynamoDB, EventBridge, and IAM resources.
+- CI/CD is fully automated via GitHub Actions and CDK.
+- This pattern should be listed in the PDP Portal so any team can select “API Service Pattern” and automatically generate their own repo with this structure and workflows.
+
+The goal:
+Generate a **Confluence-ready document** that describes this repository as a **reusable PDP pattern**, not just a single project.
+
+Include the following sections in the output:
+
+1. **Title:** API Service Pattern (Principal PDP Portal)
+2. **Purpose:** Why this pattern exists, who uses it, and what problems it solves.
+3. **Pattern Overview:** Explain that this repo is a base template to create new backend API services in Principal Cloud via PDP Portal.
+4. **Architecture Summary:** Summarize the technologies (AWS Lambda, API Gateway, DynamoDB, EventBridge, CDK constructs, pfLogger, AppConfig).
+5. **Repository Structure:** Provide a clean folder tree with purpose of each folder/file.
+6. **Handler Descriptions:** Short purpose for each main handler file.
+7. **Infrastructure & CDK Constructs:** Explain how the infra is created through shared constructs (not locally).
+8. **CI/CD Workflow:** Describe the GitHub Actions build/test/deploy process.
+9. **End-to-End Flow:** Describe what happens from PDP pattern creation → new repo generation → code push → CI/CD deploy → service live.
+10. **Pattern Lifecycle:** Explain how the pattern is maintained, versioned, and reused.
+11. **Pattern Manifest (Example YAML):** Include a realistic YAML snippet for PDP registration metadata (name, id, owner, tags, repo URL, etc.).
+12. **Risks and Guardrails:** Mention SNS/Lambda recreation risks, version pinning, construct drift, and feature flag latency.
+13. **Developer Onboarding (for pattern users):** Checklist for teams who instantiate the pattern.
+14. **Future Enhancements:** Ideas for improving the pattern (e.g., Terraform support, multi-environment config).
+15. **Contacts / Ownership:** Who owns and maintains this pattern.
+
+Format the output in **clear Confluence markdown or plain text**, ready to paste internally.
+Make it sound professional, simple, and factual — suitable for internal developer documentation.
+Add short “(To confirm)” notes for any assumptions.
+
+
+<br>
+<br>
+<br>
+
+API Service Pattern (Principal Developer Portal Marketplace)
+🧭 1. Purpose
+
+The API Service Pattern is a reusable template that enables teams to quickly create and deploy new backend API services on Principal Cloud using AWS serverless technologies.
+It is not a standalone application — it is a base pattern repository registered in the Principal Developer Portal (PDP) marketplace.
+
+When a team selects this pattern in the PDP Portal, a new GitHub repository is automatically generated with all required configurations, infrastructure code, and CI/CD pipelines prebuilt.
+
+🧱 2. Pattern Overview
+Item	Description
+Pattern Type	Backend API Service
+Technology Stack	AWS Lambda, API Gateway, DynamoDB, EventBridge, AWS CDK, TypeScript
+Infrastructure Source	Shared CDK Constructs Repository (Principal internal library)
+CI/CD	GitHub Actions workflows (build, test, deploy)
+Configuration Management	AWS AppConfig for feature flags
+Logging & Tracing	Principal pfLogger and AWS X-Ray
+Pattern Ownership	API Platform / Cloud Enablement Team
+Pattern Version	v1.0.0 (To confirm)
+
+Goal:
+Provide a standard, production-ready starting point for teams building new microservices that follow Principal’s best practices for infrastructure, deployment, and observability.
+
+🧩 3. Architecture Summary
+
+Key Components:
+
+AWS Lambda Functions: Handle API requests, event listeners, and background processing.
+
+Amazon API Gateway: Exposes REST endpoints for Lambda integrations.
+
+DynamoDB: Persists data and emits streams for event propagation.
+
+EventBridge: Central event bus for publishing and consuming domain events.
+
+AppConfig: Manages runtime feature flags.
+
+CDK Constructs: Shared infrastructure components (API, storage, permissions) imported from the constructs repository.
+
+GitHub Actions: Automates build, test, and deployment workflows.
+
+Design Principles:
+
+Serverless-first, event-driven architecture.
+
+Zero manual configuration for developers.
+
+Secure and compliant by design (IAM policies, encryption, observability included).
+
+Self-contained template for easy reuse and governance.
+
+🗂️ 4. Repository Structure
+api-service/
+├── app/                         → Lambda handlers and utilities
+│   ├── health-check-handler.ts          (Service health endpoint)
+│   ├── example-api-service-handler.ts   (Sample API implementation)
+│   ├── event-listener-handler.ts        (Event consumer example)
+│   ├── event-publication-utils.ts       (Outbox pattern utility)
+│   ├── example-api-service-event-handler.ts (Publishes events to EventBridge)
+│   ├── ddb-event-broker-handler.ts      (Streams to EventBridge bridge)
+│   ├── appconfig-client.ts              (Feature flag management)
+│   └── failover-check-handler.ts        (DR validation)
+│
+├── infrastructure/              → CDK app importing shared constructs
+├── test/                        → Unit and end-to-end test examples
+├── .github/workflows/           → GitHub Actions for CI/CD
+├── package.json                 → Dependencies and CDK config
+├── tsconfig.json                → TypeScript configuration
+└── README.md                    → Setup instructions
+
+⚙️ 5. Lambda Handlers — Summary
+Handler	Description
+health-check-handler.ts	Checks application and DynamoDB health; used for ALB and monitoring probes.
+example-api-service-handler.ts	Demo API showing Principal logging (pfLogger) and AWS X-Ray tracing.
+event-listener-handler.ts	Handles SNS/EventBridge messages; used as an event-driven consumer template.
+event-publication-utils.ts	Implements Outbox pattern — writes domain events to DynamoDB and publishes to EventBridge reliably.
+example-api-service-event-handler.ts	Sample event publisher endpoint that calls Outbox utility to emit domain events.
+ddb-event-broker-handler.ts	Listens to DynamoDB stream changes and forwards events to EventBridge.
+appconfig-client.ts	Retrieves feature flags from AWS AppConfig.
+failover-check-handler.ts	(To confirm) Checks failover or DR status of service deployment.
+🏗️ 6. Infrastructure Overview
+
+The infrastructure code under /infrastructure defines AWS resources using AWS CDK (TypeScript).
+However, this pattern does not create raw resources directly — it imports Principal’s shared CDK construct libraries from a separate repository.
+
+Example (Conceptual)
+import { ApiServiceConstruct } from '@principal/constructs';
+new ApiServiceConstruct(this, 'ApiService', {
+handlers: ['health-check', 'example-api-service'],
+enableDynamoDB: true,
+enableEventBridge: true
+});
+
+
+Infra Components Created (via constructs):
+
+Lambda functions (one per handler)
+
+API Gateway routes
+
+DynamoDB tables with streams
+
+EventBridge event bus and rules
+
+IAM roles and permissions
+
+Optional AppConfig and S3 resources
+
+🔄 7. CI/CD Workflow (GitHub Actions)
+Step	Description
+Build	npm ci, npm run build, linting, and unit tests.
+CDK Synth	Generates CloudFormation templates via cdk synth.
+Deploy	Deploys stack via cdk deploy --require-approval never.
+Post-Deploy Tests	Executes e2e tests to verify API health and event flow.
+
+Trigger Points:
+
+Pull Request: Build + Test workflow.
+
+Merge to Main: Full deploy to environment (dev/test/prod).
+
+Manual trigger (optional): For redeploys or environment promotions.
+
+Secrets Required:
+
+AWS_ACCESS_KEY_ID
+
+AWS_SECRET_ACCESS_KEY
+
+AWS_REGION
+
+Optional: CDK_CONTEXT, GITHUB_TOKEN
+
+🌐 8. Pattern Lifecycle in PDP Portal
+Step-by-Step Flow
+
+Pattern Registration:
+Platform team maintains and registers this repo in the PDP Portal Marketplace.
+
+Pattern Selection:
+Any team visits the PDP Portal → selects API Service Pattern.
+
+New Repo Generation:
+PDP automatically creates a new GitHub repo (e.g., team-order-api) using this pattern as the base.
+
+Code Customization:
+The new team adds business logic, endpoints, or event integrations.
+
+Deployment:
+CI/CD pipelines deploy the service using CDK constructs automatically.
+
+Maintenance:
+Platform team updates the pattern (e.g., v1.1 → v1.2).
+New teams get updates by rebasing or reinitializing pattern versions.
+
+🧾 9. Pattern Manifest Example (YAML)
+pattern:
+name: "API Service Pattern"
+id: "api-service-pattern"
+version: "1.0.0"
+category: "Backend"
+owner: "API Platform Team"
+description: "Reusable serverless API template with event-driven architecture support. Provides Lambda handlers, CDK infra, and CI/CD for rapid onboarding."
+githubTemplateRepo: "principal-cloud/api-service"
+runtime: "AWS Lambda (TypeScript)"
+deployment: "AWS CDK with shared constructs"
+ciCd: "GitHub Actions"
+tags:
+- lambda
+- api
+- event-driven
+- dynamodb
+- eventbridge
+- cdk
+documentation:
+confluenceUrl: "https://confluence.principal.com/display/PDP/API+Service+Pattern"
+supports:
+- feature-flags
+- health-check
+- event-publication
+- event-listener
+
+⚠️ 10. Risks & Guardrails
+Risk	Impact	Mitigation
+SNS / DynamoDB recreation	ARN changes break Lambda subscriptions	Use RemovalPolicy.RETAIN and stable logical IDs
+Construct version drift	Pattern breaks when construct versions change	Pin construct versions in package.json
+Infra dependency ordering	Lambda deployed before SNS/EventBridge	Enforce deploy sequence and use outputs
+Duplicate event processing	DynamoDB stream replay	Implement idempotency keys in Outbox pattern
+AppConfig latency	Delay fetching feature flags	Cache or preload configuration at cold start
+🚀 11. Developer Onboarding (for Teams Using This Pattern)
+
+In PDP Portal, select API Service Pattern.
+
+Enter repository name and environment.
+
+PDP provisions a new GitHub repo from this template.
+
+Clone new repo locally.
+
+Run npm ci → npm run build → npm test.
+
+Add custom business logic inside /app.
+
+Push code to trigger GitHub Actions build.
+
+Merge PR to deploy to cloud.
+
+Validate /health endpoint and e2e tests.
+
+Register new service in monitoring systems.
+
+🧩 12. Future Enhancements
+
+Add multi-environment configuration support (dev/qa/prod).
+
+Integrate automated API documentation generation.
+
+Add Terraform module equivalent for hybrid teams.
+
+Include sample integration tests with mock events.
+
+Extend pattern to support async job processing (SQS, Step Functions).
+
+👥 13. Ownership & Contacts
+Role	Team	Contact
+Pattern Owner	API Platform / Cloud Enablement	(To confirm: email or Slack channel)
+Infra Constructs Maintainer	Platform Infrastructure Team	(To confirm)
+CI/CD Template Maintainer	DevOps Guild	(To confirm)
+Documentation Maintainer	Developer Experience	(To confirm)
+🧠 14. References
+
+Principal CDK Constructs Repository (internal link)
+
+Principal Developer Portal Documentation
+
+Principal Logging Library (@principal/pflogger)
+
+AWS CDK Documentation
+
+AWS Lambda and EventBridge Guides
+
+✅ Usage Tip for You (Mayur):
+Once you paste this in Confluence:
+
+Add a short intro sentence like:
+“This page describes the API Service Pattern registered in the Principal Developer Portal (PDP). It serves as a reusable template for onboarding backend API services.”
+
+Tag your tech lead or architect with:
+@InfraTeam please validate construct version and ownership details.
