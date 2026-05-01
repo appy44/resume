@@ -1,4 +1,28 @@
-/* Themed Styles for Experience Carousel */
+/* Base blur utility */
+.txt-blur {
+    filter: blur(6px);
+    transition: filter 0.3s ease;
+    user-select: none;
+}
+
+/* Optional: reveal on hover (good UX) */
+.txt-blur:hover {
+    filter: blur(10px);
+}
+
+/* Stronger privacy mode (no hover reveal) */
+.txt-blur--locked {
+    filter: blur(8px);
+    pointer-events: none;
+}
+
+/* Optional: slight opacity for better masking */
+.txt-blur-soft {
+    filter: blur(5px);
+    opacity: 0.6;
+}
+
+s/* Themed Styles for Experience Carousel */
 .exp-carousel {
     padding: 20px;
     color: var(--text-color);

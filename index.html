@@ -20,7 +20,7 @@
 
 <!-- HTML: Modular Hire Me Modal -->
 <div id="hm-modal" class="hm-modal">
-  <a href="Tech_Enablement_Transition_Summary (1).xlsx" hidden>asdasd</a>
+    <a href="Tech_Enablement_Transition_Summary (1).xlsx" hidden>asdasd</a>
     <div class="hm-modal-content">
         <div style="text-align:Center">
             <a href="download-cv.php" download class="btn-glow btn-sm" id="cv-download-btn" hidden>
@@ -108,21 +108,21 @@
         <div class="exp-card" onclick="openExperienceModal(5)">
             <div class="exp-badge">5</div>
             <h3 class="exp-title">Module Lead</h3>
-            <p class="exp-company">YASH Technologies</p>
+            <p class="exp-company txt-blur">abcdefg</p>
             <p class="exp-duration">2023 – Present</p>
         </div>
 
         <div class="exp-card" onclick="openExperienceModal(4)">
             <div class="exp-badge">4</div>
             <h3 class="exp-title">Senior Developer</h3>
-            <p class="exp-company">Capgemini</p>
+            <p class="exp-company txt-blur">abcdefg</p>
             <p class="exp-duration">2020 – 2023</p>
         </div>
 
         <div class="exp-card" onclick="openExperienceModal(3)">
             <div class="exp-badge">3</div>
             <h3 class="exp-title">Java Developer</h3>
-            <p class="exp-company">IBM (Vodafone)</p>
+            <p class="exp-company txt-blur">abcdefg</p>
             <p class="exp-duration">2018 – 2020</p>
         </div>
 
@@ -130,19 +130,19 @@
         <div class="exp-card" onclick="openExperienceModal(2)">
             <div class="exp-badge">2</div>
             <h3 class="exp-title">Software Developer</h3>
-            <p class="exp-company">e-Aaria Software</p>
+            <p class="exp-company txt-blur">abcdefg</p>
             <p class="exp-duration">2016 – 2018</p>
         </div>
 
         <div class="exp-card" onclick="openExperienceModal(1)">
             <div class="exp-badge">1</div>
             <h3 class="exp-title">Java Developer</h3>
-            <p class="exp-company">Evoke Systems</p>
+            <p class="exp-company txt-blur">abcdefg</p>
             <p class="exp-duration">2015 – 2016</p>
         </div>
     </div>
 </section>
-
+<div id="funny-alert" class="funny-alert"></div>
 
 <!-- Link external CSS -->
 <link rel="stylesheet" href="css/experience-carousel.css">
@@ -175,99 +175,99 @@
 
 </section>
 <footer>
-    <p>Contact: mayursontale@gmail.com | +91 **********</p>
+    <p class="txt-blur">Contact: mayursontale@gmail.com | +91 **********</p>
     <p><a href="http://www.mayursontale.co.in">www.mayursontale.com</a></p>
 </footer>
 
 <div id="particles-bg"></div>
 <style>
 
-#particles-bg{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-z-index:-1;
-pointer-events:none;
-}
+    #particles-bg{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
+    pointer-events:none;
+    }
 
-#particles-bg canvas{
-width:100%;
-height:100%;
-display:block;
-}
+    #particles-bg canvas{
+    width:100%;
+    height:100%;
+    display:block;
+    }
 
 </style>
 
 <script>
 
-(function(){
+    (function(){
 
-const container = document.getElementById("particles-bg")
+    const container = document.getElementById("particles-bg")
 
-const canvas = document.createElement("canvas")
-const ctx = canvas.getContext("2d")
+    const canvas = document.createElement("canvas")
+    const ctx = canvas.getContext("2d")
 
-container.appendChild(canvas)
+    container.appendChild(canvas)
 
-let particles=[]
-const particleCount=70
+    let particles=[]
+    const particleCount=70
 
-function resize(){
-canvas.width=window.innerWidth
-canvas.height=window.innerHeight
-}
+    function resize(){
+    canvas.width=window.innerWidth
+    canvas.height=window.innerHeight
+    }
 
-window.addEventListener("resize",resize)
-resize()
+    window.addEventListener("resize",resize)
+    resize()
 
-function createParticles(){
+    function createParticles(){
 
-particles=[]
+    particles=[]
 
-for(let i=0;i<particleCount;i++){
+    for(let i=0;i<particleCount;i++){
 
-particles.push({
-x:Math.random()*canvas.width,
-y:Math.random()*canvas.height,
-vx:(Math.random()-0.5)*0.6,
-vy:(Math.random()-0.5)*0.6,
-size:Math.random()*2+1
-})
+    particles.push({
+    x:Math.random()*canvas.width,
+    y:Math.random()*canvas.height,
+    vx:(Math.random()-0.5)*0.6,
+    vy:(Math.random()-0.5)*0.6,
+    size:Math.random()*2+1
+    })
 
-}
+    }
 
-}
+    }
 
-createParticles()
+    createParticles()
 
-function draw(){
+    function draw(){
 
-ctx.clearRect(0,0,canvas.width,canvas.height)
+    ctx.clearRect(0,0,canvas.width,canvas.height)
 
-particles.forEach(p=>{
+    particles.forEach(p=>{
 
-p.x+=p.vx
-p.y+=p.vy
+    p.x+=p.vx
+    p.y+=p.vy
 
-if(p.x<0||p.x>canvas.width)p.vx*=-1
-if(p.y<0||p.y>canvas.height)p.vy*=-1
+    if(p.x<0||p.x>canvas.width)p.vx*=-1
+    if(p.y<0||p.y>canvas.height)p.vy*=-1
 
-ctx.beginPath()
-ctx.arc(p.x,p.y,p.size,0,Math.PI*2)
-ctx.fillStyle="rgba(120,180,255,0.7)"
-ctx.fill()
+    ctx.beginPath()
+    ctx.arc(p.x,p.y,p.size,0,Math.PI*2)
+    ctx.fillStyle="rgba(120,180,255,0.7)"
+    ctx.fill()
 
-})
+    })
 
-requestAnimationFrame(draw)
+    requestAnimationFrame(draw)
 
-}
+    }
 
-draw()
+    draw()
 
-})()
+    })()
 
 </script>
 <div id="rightClickToast" class="toast-message" style="display:none;">
