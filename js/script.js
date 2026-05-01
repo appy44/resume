@@ -114,7 +114,6 @@ const HM = {
             " - Wherever I can flex my Technical + analytical skills",
             "",
             "Let's Talk",
-            " - mayursontale@gmail.com",
             " - +91 **********"
         ];
 
