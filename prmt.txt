@@ -1,0 +1,284 @@
+Feature Flag Client SDK for Node.js
+
+Act as a Principal Software Architect and Senior Node.js Engineer.
+
+Design and implement a reusable Node.js/TypeScript Feature Flag Client SDK.
+
+Business Context
+
+We have an AWS Lambda API that exposes feature flags stored in AWS AppConfig.
+
+Application teams should not directly call the API.
+
+Instead they should install/import a reusable SDK and use:
+
+await featureFlagClient.fetchFlags();
+
+await featureFlagClient.fetchFlags([
+    "featureA",
+    "featureB"
+]);
+
+await featureFlagClient.getFlag("featureA");
+
+Functional Requirements
+
+SDK Initialization
+
+Application should initialize SDK during startup.
+
+Example:
+
+FeatureFlagClient.initialize({
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    endpoint: "https://api.company.com/feature-flags",
+    pollingIntervalSeconds: 120,
+    defaultValues: {
+        featureA: false,
+        featureB: true
+    }
+});
+
+Authentication
+
+SDK should support client credentials.
+
+Client ID and Client Secret will be configured by consuming application.
+
+During initialization:
+
+1. Authenticate with backend API.
+2. Obtain access token.
+3. Store token securely in memory.
+4. Automatically refresh token if expired.
+5. Retry token acquisition on failures.
+
+Fetch All Flags
+
+const flags = await featureFlagClient.fetchFlags();
+
+Response:
+
+{
+  "featureA": true,
+  "featureB": false,
+  "configA": {
+      "timeout": 30,
+      "region": "ap-south-1"
+  }
+}
+
+Fetch Selected Flags
+
+const flags = await featureFlagClient.fetchFlags([
+    "featureA",
+    "configA"
+]);
+
+Response:
+
+{
+  "featureA": true,
+  "configA": {
+      "timeout": 30,
+      "region": "ap-south-1"
+  }
+}
+
+Single Flag Fetch
+
+const value = await featureFlagClient.getFlag("featureA");
+
+Response:
+
+true
+
+Caching Requirements
+
+In-Memory Cache
+
+SDK should maintain an in-memory cache.
+
+Example:
+
+Map<string, any>
+
+or equivalent thread-safe structure.
+
+Startup Behavior
+
+When application starts:
+
+1. Cache is empty.
+2. SDK should immediately call backend API.
+3. Populate cache.
+4. If API unavailable:
+   - Return configured default values.
+   - Continue retrying in background.
+
+Runtime Behavior
+
+Whenever application requests flags:
+
+1. Check cache first.
+2. If cache contains value:
+   - Return cached value.
+3. If cache missing:
+   - Call backend API.
+   - Update cache.
+   - Return result.
+4. If API fails:
+   - Return default value if available.
+   - Never crash application.
+
+Polling / Synchronization
+
+SDK should support background polling.
+
+Default:
+
+120 seconds
+
+Configurable:
+
+pollingIntervalSeconds
+
+Background scheduler should:
+
+1. Call API periodically.
+2. Fetch latest flags.
+3. Update cache.
+4. Replace stale values.
+5. Log sync results.
+
+Configuration Requirements
+
+Support configuration through:
+
+Option 1
+
+config.yaml
+
+featureFlags:
+  endpoint: https://api.company.com
+  clientId: my-client
+  clientSecret: secret
+  pollingIntervalSeconds: 120
+
+Option 2
+
+Environment Variables
+
+FEATURE_FLAG_ENDPOINT=
+FEATURE_FLAG_CLIENT_ID=
+FEATURE_FLAG_CLIENT_SECRET=
+FEATURE_FLAG_POLL_INTERVAL=120
+
+Option 3
+
+Code Configuration
+
+FeatureFlagClient.initialize(...)
+
+Priority:
+
+Code Config
+    >
+Environment Variables
+    >
+YAML Config
+
+Reliability Requirements
+
+Implement:
+
+Retry
+
+Use exponential backoff.
+
+Example:
+
+1 sec
+2 sec
+4 sec
+8 sec
+
+Max retry configurable.
+
+Timeout
+
+API timeout configurable.
+
+Default:
+
+5 seconds
+
+Circuit Breaker
+
+If API repeatedly fails:
+
+1. Open circuit.
+2. Serve cached data.
+3. Retry after cool-down period.
+
+Graceful Degradation
+
+Always prefer:
+
+Cache
+→ Default Values
+→ Empty Response
+
+Never crash consuming application.
+
+Observability
+
+Provide structured logs:
+
+INFO  Cache initialized
+INFO  Polling started
+INFO  Cache refreshed
+WARN  API unavailable
+WARN  Serving cached values
+ERROR Authentication failed
+
+Provide metrics hooks:
+
+cache_hit
+cache_miss
+api_call_success
+api_call_failure
+polling_success
+polling_failure
+
+Security Requirements
+
+1. Do not log secrets.
+2. Store access token only in memory.
+3. Support HTTPS only.
+4. Validate API responses.
+5. Sanitize inputs.
+
+Deliverables
+
+Provide:
+
+1. High-level architecture diagram.
+2. Component design.
+3. Folder structure.
+4. TypeScript interfaces.
+5. Class diagram.
+6. Complete implementation.
+7. Polling scheduler implementation.
+8. Cache manager implementation.
+9. Authentication manager implementation.
+10. Retry and circuit breaker implementation.
+11. Unit tests.
+12. Integration tests.
+13. NPM package structure.
+14. Sample consumer application.
+15. Production deployment recommendations.
+16. Sequence diagrams for startup, cache refresh, and runtime flag retrieval.
+
+Use clean architecture, SOLID principles, TypeScript, async/await, dependency injection, and production-grade coding standards.
