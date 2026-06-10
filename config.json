@@ -1,0 +1,32 @@
+{
+  "accounts": {
+    "admin": {
+      "profile": "admin",
+      "api": {
+        "rest_api_id": "REPLACE_API_ID",
+        "stage": "dev",
+        "authorizer_id": "REPLACE_AUTHORIZER_ID",
+        "resources": {
+          "fetchFlags": {
+            "resource_id": "REPLACE_RESOURCE_ID",
+            "http_method": "GET"
+          }
+        }
+      }
+    },
+    "consumer": {
+      "profile": "consumer",
+      "api": {
+        "rest_api_id": "REPLACE_API_ID",
+        "stage": "dev",
+        "authorizer_id": "REPLACE_AUTHORIZER_ID",
+        "resources": {
+          "fetchFlags": {
+            "resource_id": "REPLACE_RESOURCE_ID",
+            "http_method": "GET"
+          }
+        }
+      }
+    }
+  }
+}
