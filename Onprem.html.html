@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>OnPrem MultiCloud Feature Flag Cost Calculator</title>
+<style>
+body{font-family:Segoe UI,Arial;background:#f7f8fa;margin:20px;color:#222}
+.card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:16px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+input{padding:6px;width:100%}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ddd;padding:8px}
+th{background:#f1f1f1}
+h1,h2{margin-top:0}
+</style>
+</head>
+<body>
+
+<h1>On-Prem / Multi-Cloud Feature Flag Cost Calculator</h1>
+
+<div class="card">
+<h2>Inputs</h2>
+<div class="grid">
+<div><label>Applications</label><input id="apps" value="100"></div>
+<div><label>Servers Per App</label><input id="servers" value="2"></div>
+<div><label>Polling Seconds</label><input id="poll" value="120"></div>
+<div><label>Updates Per Day</label><input id="updates" value="20"></div>
+
+<div><label>Admin Reads / Month</label><input id="admin" value="10000"></div>
+<div><label>AppConfig Free Tier</label><input id="appfree" value="1000000"></div>
+<div><label>API Gateway Free Tier</label><input id="apifree" value="1000000"></div>
+<div><label>Lambda Free Tier</label><input id="lambdafree" value="1000000"></div>
+
+<div><label>CloudFront Free Tier</label><input id="cffree" value="10000000"></div>
+<div><label>AppConfig $/1M</label><input id="appcost" value="1"></div>
+<div><label>API GW $/1M</label><input id="apicost" value="1"></div>
+<div><label>Lambda $/1M</label><input id="lambdacost" value="0.2"></div>
+
+<div><label>CloudFront $/1M</label><input id="cfcost" value="0.75"></div>
+</div>
+</div>
+
+<div class="card">
+<h2>Executive Summary</h2>
+<div id="summary"></div>
+</div>
+
+<div class="card">
+<h2>CDN Architecture</h2>
+<div id="cdn"></div>
+</div>
+
+<div class="card">
+<h2>API Architecture</h2>
+<div id="api"></div>
+</div>
+
+<script>
+function g(id){return Number(document.getElementById(id).value)||0;}
+function fmt(v){return Math.round(v).toLocaleString();}
+function money(v){return "$"+v.toFixed(2);}
+
+function table(rows){
+ let h='<table><tr><th>Component</th><th>Usage</th><th>Free Tier</th><th>Billable</th><th>Monthly Cost</th></tr>';
+ rows.forEach(r=>{
+  h+=`<tr><td>${r[0]}</td><td>${fmt(r[1])}</td><td>${fmt(r[2])}</td><td>${fmt(r[3])}</td><td>${money(r[4])}</td></tr>`;
+ });
+ h+='</table>';
+ return h;
+}
+
+function calc(){
+
+ let apps=g('apps');
+ let servers=g('servers');
+ let poll=g('poll');
+ let updates=g('updates');
+ let admin=g('admin');
+
+ let appfree=g('appfree');
+ let apifree=g('apifree');
+ let lambdafree=g('lambdafree');
+ let cffree=g('cffree');
+
+ let appcost=g('appcost');
+ let apicost=g('apicost');
+ let lambdacost=g('lambdacost');
+ let cfcost=g('cfcost');
+
+ let instances=apps*servers;
+ let pollsPerInstance=2592000/poll;
+ let pollReq=instances*pollsPerInstance;
+ let updatesMonth=updates*30;
+
+ // CDN
+ let cdnAppReads=updatesMonth;
+ let cdnAppBill=Math.max(0,cdnAppReads-appfree);
+ let cfBill=Math.max(0,pollReq-cffree);
+
+ let cdnAppCost=(cdnAppBill/1000000)*appcost;
+ let cfCost=(cfBill/1000000)*cfcost;
+
+ let cdnTotal=cdnAppCost+cfCost+0.15;
+
+ document.getElementById('cdn').innerHTML=
+ `<p><b>SDK Instances:</b> ${fmt(instances)} | <b>Poll Requests:</b> ${fmt(pollReq)}</p>`+
+ table([
+ ['AppConfig Reads',cdnAppReads,appfree,cdnAppBill,cdnAppCost],
+ ['CloudFront Requests',pollReq,cffree,cfBill,cfCost],
+ ['S3 + EventBridge + Publisher Lambda',600,999999999,0,0.15]
+ ])+
+ `<p><b>Total Monthly:</b> ${money(cdnTotal)} | <b>Annual:</b> ${money(cdnTotal*12)}</p>`;
+
+ // API
+ let apiReads=pollReq+admin;
+ let apiBill=Math.max(0,apiReads-appfree);
+ let apiGwBill=Math.max(0,pollReq-apifree);
+ let lambdaBill=Math.max(0,pollReq-lambdafree);
+
+ let apiAppCost=(apiBill/1000000)*appcost;
+ let apiGwCost=(apiGwBill/1000000)*apicost;
+ let lambdaCost=(lambdaBill/1000000)*lambdacost;
+
+ let apiTotal=apiAppCost+apiGwCost+lambdaCost;
+
+ document.getElementById('api').innerHTML=
+ `<p><b>SDK Instances:</b> ${fmt(instances)} | <b>Poll Requests:</b> ${fmt(pollReq)}</p>`+
+ table([
+ ['AppConfig Reads',apiReads,appfree,apiBill,apiAppCost],
+ ['API Gateway Requests',pollReq,apifree,apiGwBill,apiGwCost],
+ ['Lambda Invocations',pollReq,lambdafree,lambdaBill,lambdaCost]
+ ])+
+ `<p><b>Total Monthly:</b> ${money(apiTotal)} | <b>Annual:</b> ${money(apiTotal*12)}</p>`;
+
+ document.getElementById('summary').innerHTML=`
+ <table>
+ <tr><th>Architecture</th><th>Monthly</th><th>Annual</th></tr>
+ <tr><td>CDN</td><td>${money(cdnTotal)}</td><td>${money(cdnTotal*12)}</td></tr>
+ <tr><td>API</td><td>${money(apiTotal)}</td><td>${money(apiTotal*12)}</td></tr>
+ </table>
+ <p><b>Cheapest:</b> ${cdnTotal<apiTotal?'CDN':'API'}</p>`;
+}
+
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',calc));
+calc();
+</script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Cross Account Feature Flag Cost Calculator</title>
+<style>
+body{font-family:Segoe UI,Arial;background:#f8f9fb;margin:20px;color:#222}
+.card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:16px;margin:12px 0}
+input{padding:6px;width:120px}
+button{padding:8px 12px}
+table{border-collapse:collapse;width:100%;margin-top:10px}
+th,td{border:1px solid #ddd;padding:8px}
+th{background:#f3f3f3}
+.summary{font-weight:bold}
+</style>
+</head>
+<body>
+
+<h1>AWS Cross Account Feature Flag Cost Calculator</h1>
+
+<div class="card">
+<h2>Global Pricing & Free Tier</h2>
+AppConfig Free Requests/Month <input id="appFree" value="1000000">
+AppConfig Cost per 1M <input id="appCost" value="1">
+Extension Refresh Interval (sec) <input id="refresh" value="45">
+<button onclick="addAccount()">Add Workload Account</button>
+</div>
+
+<div class="card">
+<h2>Executive Summary</h2>
+<div id="summary"></div>
+</div>
+
+<div id="accounts"></div>
+
+<script>
+let count=0;
+
+function addAccount(){
+ count++;
+ const div=document.createElement('div');
+ div.className='card';
+ div.id='acct'+count;
+
+ div.innerHTML=`
+ <h2>Workload Account ${count}</h2>
+
+ AppConfig Profiles:
+ <input value="10" class="profiles">
+
+ Lambda Functions:
+ <input value="20" class="lambdas">
+
+ Monthly Lambda Invocations Per Function:
+ <input value="100000" class="invocations">
+
+ <div class="result"></div>
+ `;
+
+ document.getElementById('accounts').appendChild(div);
+
+ div.querySelectorAll('input').forEach(i=>{
+   i.addEventListener('input',calculate);
+ });
+
+ calculate();
+}
+
+function money(v){return '$'+v.toFixed(2);}
+function fmt(v){return Math.round(v).toLocaleString();}
+
+function calculate(){
+
+ const appFree=Number(document.getElementById('appFree').value)||0;
+ const appCost=Number(document.getElementById('appCost').value)||0;
+ const refresh=Number(document.getElementById('refresh').value)||45;
+
+ let totalMonthly=0;
+ let totalAnnual=0;
+ let totalReads=0;
+ let htmlSummary=`
+ <table>
+ <tr>
+ <th>Account</th>
+ <th>Profiles</th>
+ <th>Extension Reads</th>
+ <th>Billable Reads</th>
+ <th>Monthly Cost</th>
+ <th>Annual Cost</th>
+ </tr>`;
+
+ document.querySelectorAll('[id^=acct]').forEach((acct,idx)=>{
+
+   const profiles=Number(acct.querySelector('.profiles').value)||0;
+   const lambdas=Number(acct.querySelector('.lambdas').value)||0;
+   const invocations=Number(acct.querySelector('.invocations').value)||0;
+
+   const extensionReads =
+      profiles * (2592000 / refresh);
+
+   const billable=Math.max(0,extensionReads-appFree);
+
+   const cost=(billable/1000000)*appCost;
+
+   const annual=cost*12;
+
+   totalMonthly+=cost;
+   totalAnnual+=annual;
+   totalReads+=extensionReads;
+
+   acct.querySelector('.result').innerHTML=`
+   <table>
+   <tr><th>Metric</th><th>Value</th></tr>
+   <tr><td>AppConfig Profiles</td><td>${fmt(profiles)}</td></tr>
+   <tr><td>Lambda Functions</td><td>${fmt(lambdas)}</td></tr>
+   <tr><td>Monthly Lambda Invocations</td><td>${fmt(invocations*lambdas)}</td></tr>
+   <tr><td>Extension Refresh Interval</td><td>${refresh}s</td></tr>
+   <tr><td>AppConfig Extension Reads</td><td>${fmt(extensionReads)}</td></tr>
+   <tr><td>AWS Free Tier</td><td>${fmt(appFree)}</td></tr>
+   <tr><td>Billable Reads</td><td>${fmt(billable)}</td></tr>
+   <tr><td>Monthly Cost</td><td>${money(cost)}</td></tr>
+   <tr><td>Annual Cost</td><td>${money(annual)}</td></tr>
+   <tr><td>Savings From Free Tier</td><td>${fmt(Math.min(extensionReads,appFree))} requests</td></tr>
+   </table>`;
+
+   htmlSummary += `
+   <tr>
+   <td>Account ${idx+1}</td>
+   <td>${fmt(profiles)}</td>
+   <td>${fmt(extensionReads)}</td>
+   <td>${fmt(billable)}</td>
+   <td>${money(cost)}</td>
+   <td>${money(annual)}</td>
+   </tr>`;
+
+ });
+
+ htmlSummary += `
+ <tr class='summary'>
+ <td>TOTAL</td>
+ <td>-</td>
+ <td>${fmt(totalReads)}</td>
+ <td>-</td>
+ <td>${money(totalMonthly)}</td>
+ <td>${money(totalAnnual)}</td>
+ </tr>
+ </table>`;
+
+ document.getElementById('summary').innerHTML=htmlSummary;
+}
+
+document.getElementById('appFree').addEventListener('input',calculate);
+document.getElementById('appCost').addEventListener('input',calculate);
+document.getElementById('refresh').addEventListener('input',calculate);
+
+addAccount();
+</script>
+</body>
+</html>
