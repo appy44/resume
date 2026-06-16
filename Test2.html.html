@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Feature Flag TCO Calculator</title>
+<style>
+body{font-family:Arial,sans-serif;margin:20px;background:#fafafa}
+h1,h2{color:#222}
+.section{background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+input{width:100%;padding:6px}
+table{border-collapse:collapse;width:100%;margin-top:10px}
+th,td{border:1px solid #ccc;padding:6px;font-size:13px}
+th{background:#f0f0f0}
+.total{font-weight:bold;background:#f8f8f8}
+</style>
+</head>
+<body>
+<h1>Feature Flag Architecture Cost Calculator</h1>
+
+<div class="section">
+<h2>Inputs</h2>
+<div class="grid">
+<div><label>Applications</label><input id="apps" type="number" value="100"></div>
+<div><label>Servers/App</label><input id="servers" type="number" value="2"></div>
+<div><label>Polling Seconds</label><input id="poll" type="number" value="120"></div>
+<div><label>Updates/Day</label><input id="updates" type="number" value="20"></div>
+<div><label>Admin Reads/Month</label><input id="admin" type="number" value="10000"></div>
+<div><label>AWS Accounts</label><input id="accounts" type="number" value="100"></div>
+<div><label>AppConfig Free</label><input id="appfree" type="number" value="1000000"></div>
+<div><label>AppConfig $/1M</label><input id="appcost" type="number" step="0.01" value="1"></div>
+<div><label>API GW Free</label><input id="apifree" type="number" value="1000000"></div>
+<div><label>API GW $/1M</label><input id="apicost" type="number" step="0.01" value="1"></div>
+<div><label>Lambda Free</label><input id="lambdafree" type="number" value="1000000"></div>
+<div><label>Lambda $/1M</label><input id="lambdacost" type="number" step="0.01" value="0.20"></div>
+<div><label>CloudFront Free</label><input id="cffree" type="number" value="10000000"></div>
+<div><label>CloudFront $/1M</label><input id="cfcost" type="number" step="0.01" value="0.75"></div>
+</div>
+</div>
+
+<div class="section"><h2>CDN Mode (Centralized + On-Prem/Multi Cloud)</h2><div id="cdn"></div></div>
+<div class="section"><h2>API Mode (Centralized + On-Prem/Multi Cloud)</h2><div id="api"></div></div>
+<div class="section"><h2>AWS Cross Account</h2><div id="cross"></div></div>
+<div class="section"><h2>Executive Summary</h2><div id="summary"></div></div>
+
+<script>
+function g(id){return Number(document.getElementById(id).value)||0}
+function fmt(n){return Math.round(n).toLocaleString()}
+function money(n){return "$"+n.toFixed(2)}
+
+function serviceTable(rows){
+ let h='<table><tr><th>Service</th><th>Usage</th><th>Free Tier</th><th>Billable</th><th>Monthly Cost</th></tr>';
+ rows.forEach(r=>{
+   h+=`<tr><td>${r[0]}</td><td>${fmt(r[1])}</td><td>${fmt(r[2])}</td><td>${fmt(r[3])}</td><td>${money(r[4])}</td></tr>`
+ });
+ h+='</table>';
+ return h;
+}
+
+function calc(){
+ const apps=g('apps'), servers=g('servers'), poll=g('poll'), updates=g('updates');
+ const admin=g('admin'), accounts=g('accounts');
+ const appfree=g('appfree'), appcost=g('appcost');
+ const apifree=g('apifree'), apicost=g('apicost');
+ const lambdafree=g('lambdafree'), lambdacost=g('lambdacost');
+ const cffree=g('cffree'), cfcost=g('cfcost');
+
+ const instances=apps*servers;
+ const pollsPerInstance=2592000/poll;
+ const totalPolls=instances*pollsPerInstance;
+ const updatesMonth=updates*30;
+
+ // CDN
+ const cdnAppReads=updatesMonth;
+ const cfReq=totalPolls;
+ const cfBill=Math.max(0,cfReq-cffree);
+ const appBillCDN=Math.max(0,cdnAppReads-appfree);
+
+ const cfCostMonth=(cfBill/1e6)*cfcost;
+ const appCostMonthCDN=(appBillCDN/1e6)*appcost;
+ const cdnTotal=cfCostMonth+appCostMonthCDN+0.15;
+
+ document.getElementById('cdn').innerHTML=
+ `<p><b>SDK Instances:</b> ${fmt(instances)} |
+ <b>Poll Requests:</b> ${fmt(totalPolls)} |
+ <b>Flag Updates/Month:</b> ${fmt(updatesMonth)}</p>` +
+ serviceTable([
+ ['AppConfig Reads',cdnAppReads,appfree,appBillCDN,appCostMonthCDN],
+ ['CloudFront Requests',cfReq,cffree,cfBill,cfCostMonth],
+ ['S3 GET/PUT + EventBridge',600,999999999,0,0.15]
+ ]) +
+ `<p><b>Total Monthly:</b> ${money(cdnTotal)} |
+ <b>Total Annual:</b> ${money(cdnTotal*12)}</p>`;
+
+ // API
+ const apiReads=totalPolls+admin;
+ const apiAppBill=Math.max(0,apiReads-appfree);
+ const apiGwBill=Math.max(0,totalPolls-apifree);
+ const lambdaBill=Math.max(0,totalPolls-lambdafree);
+
+ const apiAppCost=(apiAppBill/1e6)*appcost;
+ const apiGwCost=(apiGwBill/1e6)*apicost;
+ const lambdaCost=(lambdaBill/1e6)*lambdacost;
+ const apiTotal=apiAppCost+apiGwCost+lambdaCost;
+
+ document.getElementById('api').innerHTML=
+ `<p><b>SDK Instances:</b> ${fmt(instances)} |
+ <b>Poll Requests:</b> ${fmt(totalPolls)}</p>` +
+ serviceTable([
+ ['AppConfig Reads',apiReads,appfree,apiAppBill,apiAppCost],
+ ['API Gateway',totalPolls,apifree,apiGwBill,apiGwCost],
+ ['Lambda Invocations',totalPolls,lambdafree,lambdaBill,lambdaCost]
+ ]) +
+ `<p><b>Total Monthly:</b> ${money(apiTotal)} |
+ <b>Total Annual:</b> ${money(apiTotal*12)}</p>`;
+
+ // Cross account
+ const crossReads=accounts*21600;
+ const crossBill=Math.max(0,crossReads-appfree);
+ const crossCost=(crossBill/1e6)*appcost;
+
+ document.getElementById('cross').innerHTML=
+ serviceTable([
+ ['AppConfig Extension Reads',crossReads,appfree,crossBill,crossCost]
+ ]) +
+ `<p><b>STS AssumeRole:</b> During updates only</p>
+ <p><b>Total Monthly:</b> ${money(crossCost)} |
+ <b>Total Annual:</b> ${money(crossCost*12)}</p>`;
+
+ document.getElementById('summary').innerHTML=`
+ <table>
+ <tr><th>Architecture</th><th>Monthly</th><th>Annual</th></tr>
+ <tr><td>CDN</td><td>${money(cdnTotal)}</td><td>${money(cdnTotal*12)}</td></tr>
+ <tr><td>API</td><td>${money(apiTotal)}</td><td>${money(apiTotal*12)}</td></tr>
+ <tr><td>Cross Account</td><td>${money(crossCost)}</td><td>${money(crossCost*12)}</td></tr>
+ </table>`;
+}
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',calc));
+calc();
+</script>
+</body>
+</html>

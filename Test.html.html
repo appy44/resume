@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Feature Flag Architecture Cost Calculator</title>
+<style>
+body{font-family:Arial,sans-serif;margin:20px;background:#f5f5f5;color:#222}
+.card{background:white;padding:16px;margin:12px 0;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+h1,h2{margin-top:0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+input{width:100%;padding:6px}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #ddd;padding:8px;text-align:left}
+th{background:#eee}
+.result{font-weight:bold}
+</style>
+</head>
+<body>
+
+<h1>Feature Flag TCO Calculator</h1>
+
+<div class="card">
+<h2>Inputs</h2>
+<div class="grid">
+<div><label>Applications</label><input id="apps" value="100" type="number"></div>
+<div><label>Servers/App</label><input id="servers" value="2" type="number"></div>
+<div><label>Polling Seconds</label><input id="poll" value="120" type="number"></div>
+<div><label>Updates/Day</label><input id="updates" value="20" type="number"></div>
+<div><label>Admin Reads/Month</label><input id="admin" value="10000" type="number"></div>
+<div><label>AWS Accounts</label><input id="accounts" value="100" type="number"></div>
+</div>
+</div>
+
+<div class="card">
+<h2>AWS Pricing / Free Tier</h2>
+<div class="grid">
+<div><label>AppConfig Free</label><input id="appfree" value="1000000"></div>
+<div><label>API GW Free</label><input id="apifree" value="1000000"></div>
+<div><label>Lambda Free</label><input id="lambdafree" value="1000000"></div>
+<div><label>CloudFront Free</label><input id="cffree" value="10000000"></div>
+<div><label>AppConfig $/1M</label><input id="appcost" value="1"></div>
+<div><label>API GW $/1M</label><input id="apicost" value="1"></div>
+<div><label>Lambda $/1M</label><input id="lambdacost" value="0.2"></div>
+<div><label>CloudFront $/1M</label><input id="cfcost" value="0.75"></div>
+</div>
+</div>
+
+<div class="card">
+<h2>Centralized + On-Prem / Multi-Cloud</h2>
+<table>
+<tr><th>Metric</th><th>CDN Mode</th><th>API Mode</th></tr>
+<tbody id="cdnapi"></tbody>
+</table>
+</div>
+
+<div class="card">
+<h2>Centralized + AWS Cross Account Workloads</h2>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tbody id="cross"></tbody>
+</table>
+</div>
+
+<script>
+function n(v){return Number(v)||0;}
+function money(v){return "$"+v.toFixed(2);}
+
+function calc(){
+ let apps=n(appsEl.value);
+ let servers=n(serversEl.value);
+ let poll=n(pollEl.value);
+ let updates=n(updatesEl.value);
+ let admin=n(adminEl.value);
+ let accounts=n(accountsEl.value);
+
+ let instances=apps*servers;
+ let pollsPerInstance=2592000/poll;
+ let pollReq=instances*pollsPerInstance;
+ let updatesMonth=updates*30;
+
+ let appFree=n(appfree.value);
+ let apiFree=n(apifree.value);
+ let lambdaFree=n(lambdafree.value);
+ let cfFree=n(cffree.value);
+
+ let appCost=n(appcost.value);
+ let apiCost=n(apicost.value);
+ let lambdaCost=n(lambdacost.value);
+ let cfCost=n(cfcost.value);
+
+ let cdnAppReads=updatesMonth;
+ let apiAppReads=pollReq+admin;
+
+ let cdnMonthly=
+ Math.max(0,cdnAppReads-appFree)/1e6*appCost+
+ Math.max(0,pollReq-cfFree)/1e6*cfCost+0.15;
+
+ let apiMonthly=
+ Math.max(0,apiAppReads-appFree)/1e6*appCost+
+ Math.max(0,pollReq-apiFree)/1e6*apiCost+
+ Math.max(0,pollReq-lambdaFree)/1e6*lambdaCost;
+
+ document.getElementById("cdnapi").innerHTML=`
+ <tr><td>SDK Instances</td><td>${instances}</td><td>${instances}</td></tr>
+ <tr><td>Poll Requests/Month</td><td>${Math.round(pollReq).toLocaleString()}</td><td>${Math.round(pollReq).toLocaleString()}</td></tr>
+ <tr><td>AppConfig Reads</td><td>${cdnAppReads.toLocaleString()}</td><td>${Math.round(apiAppReads).toLocaleString()}</td></tr>
+ <tr><td>CloudFront Requests</td><td>${Math.round(pollReq).toLocaleString()}</td><td>0</td></tr>
+ <tr><td>API Gateway Requests</td><td>0</td><td>${Math.round(pollReq).toLocaleString()}</td></tr>
+ <tr><td>Monthly Cost</td><td>${money(cdnMonthly)}</td><td>${money(apiMonthly)}</td></tr>
+ <tr><td>Annual Cost</td><td>${money(cdnMonthly*12)}</td><td>${money(apiMonthly*12)}</td></tr>`;
+
+ let crossReads=accounts*21600;
+ let crossMonthly=Math.max(0,crossReads-appFree)/1e6*appCost;
+
+ document.getElementById("cross").innerHTML=`
+ <tr><td>AWS Accounts</td><td>${accounts}</td></tr>
+ <tr><td>Estimated Extension Refresh Reads</td><td>${Math.round(crossReads).toLocaleString()}</td></tr>
+ <tr><td>STS AssumeRole</td><td>During Updates Only</td></tr>
+ <tr><td>Monthly Cost</td><td>${money(crossMonthly)}</td></tr>
+ <tr><td>Annual Cost</td><td>${money(crossMonthly*12)}</td></tr>`;
+}
+const appsEl=apps,serversEl=servers,pollEl=poll,updatesEl=updates,adminEl=admin;
+document.querySelectorAll("input").forEach(i=>i.oninput=calc);
+calc();
+</script>
+
+</body>
+</html>
