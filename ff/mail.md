@@ -1,96 +1,69 @@
-Hi Team,
+Hi Vinod,
 
-We have been working on a Unified Feature Flag Platform to provide a centralized experience for feature flag management while continuing to support existing AWS AppConfig usage patterns.
+As discussed and demonstrated earlier, I am sharing the proposed architecture for centralized feature flag management using AWS AppConfig for your review and feedback.
 
-The detailed architecture, flows, and design considerations are documented in the attached Confluence page and architecture diagram.
+### Current State
 
-### What We Are Proposing
+The foundational components are already available and functional:
 
-A centralized platform that provides a single UI and service layer for:
+* A centralized AWS AppConfig (Global Flags) model has been designed to support enterprise-wide feature flags.
+* Java SDK has been developed and published to JFrog Artifactory for application teams to consume feature flags with minimal configuration.
+* SDK configuration can be provided through application properties (endpoint, credentials, polling interval, timeout, etc.).
+* The SDK handles all AppConfig communication and boilerplate logic internally.
+* An in-memory caching mechanism is implemented:
 
-* Managing Global / Enterprise Feature Flags
-* Managing AppConfig resources in individual AWS workload accounts through cross-account IAM roles
-* Centralized governance and access control
-* Reusable Feature Flag SDKs for runtime consumption
+  * Flags are loaded during application startup.
+  * Applications read flags directly from local memory cache.
+  * No runtime network calls are required for flag retrieval.
+  * Cache is refreshed automatically based on a configurable polling interval.
+  * Updated flag values become available to applications without requiring redeployment or restart.
+* A Node.js SDK has also been developed and is currently undergoing minor cosmetic and usability improvements before finalization.
 
-### Runtime Consumption Options
+### Pending Items
 
-#### Option 1 – Global / Enterprise Feature Flags (Recommended)
+The primary area currently under evaluation is access management and governance.
 
-Global feature flags are hosted and managed centrally.
+Potential approach:
 
-Applications consume flags through a shared SDK (Java and Node currently available).
+* Integrate the UI with AWS Identity Center (IDC).
+* Users request access through the enterprise entitlement process.
+* Access can be granted at an AppConfig level through predefined roles such as:
 
-Key characteristics:
+  * Viewer
+  * Reader
+  * Editor
+  * Administrator (if required)
+* Access decisions would determine which applications, flags, and operations are visible within the UI.
+* We are currently exploring the best approach for entitlement management and authorization enforcement.
 
-* Works in AWS, On-Prem, IDC, Azure, GCP, or any environment
-* SDK periodically polls the platform endpoint
-* Flags are stored in local in-memory cache
-* Runtime flag evaluation reads from cache only
-* No AppConfig call for every flag evaluation
-* Applications continue functioning using cached values during temporary AWS/platform outages
+### Future Enhancements / Scope Expansion
 
-Typical flow:
+Once the centralized platform is stabilized, we can explore additional capabilities.
 
-Application → SDK → Local Cache → Platform Endpoint → Central AppConfig
+#### Multi-Account Flag Propagation
 
-#### Option 2 – Team-Owned AWS AppConfig
+Today, feature flags are managed within a single AppConfig deployment boundary.
 
-Teams that prefer to manage their own feature flags can continue using native AWS AppConfig.
+A future enhancement could enable automatic propagation of selected flags across multiple workload accounts:
 
-Key characteristics:
+1. AppConfig deployment completes in the central account.
+2. EventBridge receives the deployment event.
+3. A Lambda function processes the event.
+4. The Lambda assumes roles in target workload accounts.
+5. Selected flags are automatically created or updated in the target AppConfig applications.
 
-* AWS only
-* Teams maintain ownership of their AppConfig resources
-* Provisioned using cdk-constructs-library
-* Independent deployment lifecycle
-* No migration required
+This would allow:
 
-Typical flow:
+* Centralized flag definition.
+* Automated distribution across multiple AWS accounts.
+* Consistent feature flag usage across related applications.
+* Reduced manual operational effort.
 
-Application → Team AppConfig
+### Request for Review
 
-### Platform Capabilities
+Could you please review the attached architecture and approach?
 
-The platform provides a unified control plane for:
-
-* Application management
-* Environment management
-* Feature flag management
-* Configuration deployments
-* Cross-account AppConfig management
-
-Depending on the selected target, users can:
-
-* Manage centralized feature flags hosted in the platform account
-* Manage AppConfig configurations in workload AWS accounts using cross-account access
-
-### Current Status
-
-Completed:
-
-* Architecture definition
-* SDK design and implementation
-* Centralized management model
-* Cross-account AppConfig management design
-
-In Progress:
-
-* IDC entitlement integration
-* Viewer and Editor role definitions
-* Platform onboarding process
-* Audit and rollout enhancements
-
-### Feedback Requested
-
-We are looking for feedback on:
-
-* Overall architecture approach
-* Runtime consumption model
-* Cross-account AppConfig management approach
-* Governance and access model
-
-Please review the attached Confluence page and architecture diagram and share any comments or concerns.
+If the overall direction aligns with the organization's needs, we can discuss next steps, ownership, prioritization, and whether this should be taken forward as a broader enterprise capability.
 
 Thanks,
 Mayur
