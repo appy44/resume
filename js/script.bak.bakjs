@@ -42,7 +42,7 @@ function FunnyAlert(message = "👀 This is private bro 😄") {
 
 
 // Modal content for role cards
-function openExperienceModal(id) {
+function openExperienceModal1(id) {
 messages = [
     "🕵️‍♂️ NDA activated!",
     "🔒 Confidential",
@@ -51,7 +51,7 @@ messages = [
 
     FunnyAlert(messages[Math.floor(Math.random() * messages.length)]);
 }
-function openExperienceModal1(id) {
+function openExperienceModal(id) {
     const experienceDetails = {
         1: {
             title: "Jr. Java Developer",
