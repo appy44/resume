@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Indian Deposit & Savings Calculator</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7fa;color:#222}.container{max-width:1100px;margin:28px auto;padding:18px}.card{background:#fff;border-radius:14px;padding:24px;box-shadow:0 3px 16px rgba(0,0,0,.08);margin-bottom:20px}h1{margin:0 0 7px}.subtitle{color:#666;margin-bottom:24px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:17px}label{display:block;font-weight:700;margin-bottom:7px}input,select{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px;background:#fff}.full{grid-column:1/-1}.info{padding:12px 14px;background:#f1f3f5;border-radius:8px;color:#555;font-size:13px;line-height:1.5}.locked{background:#f3f4f6;color:#555}.hidden{display:none}button{width:100%;margin-top:20px;padding:14px;border:0;border-radius:8px;background:#222;color:#fff;font-size:17px;font-weight:700;cursor:pointer}button:hover{background:#444}.results{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.box{background:#f5f7fa;padding:17px;border-radius:9px}.highlight{background:#eaf7ee}.title{font-size:13px;color:#666;margin-bottom:7px}.value{font-size:21px;font-weight:700}.table-wrap{overflow:auto;margin-top:18px}table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:10px;border-bottom:1px solid #ddd;text-align:right}th:first-child,td:first-child{text-align:center}th{background:#f1f3f5}.note{font-size:13px;color:#666;line-height:1.55;margin-top:14px}.badge{display:inline-block;padding:4px 8px;border-radius:20px;background:#eee;font-size:12px;margin-left:6px}.source{font-size:12px;color:#777;margin-top:10px}@media(max-width:700px){.grid,.results{grid-template-columns:1fr}.container{padding:10px}.card{padding:18px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card">
+<h1>Indian Deposit & Savings Calculator</h1>
+<div class="subtitle">Select the scheme. The calculator automatically applies the scheme's current rate and calculation method where supported.</div>
+<div class="grid">
+<div><label for="scheme">Scheme</label><select id="scheme" onchange="schemeChanged()">
+<option value="hdfcfd">Bank FD — HDFC Bank</option>
+<option value="icicifd">Bank FD — ICICI Bank</option>
+<option value="sbifd">Bank FD — SBI</option>
+<option value="bankrd">Bank RD — HDFC Bank</option>
+<option value="banksavings">Bank Savings Account</option>
+<option value="potd">Post Office Time Deposit (TD)</option>
+<option value="pord">Post Office RD</option>
+<option value="ssa">Sukanya Samriddhi Account (SSA)</option>
+<option value="ppf">PPF</option>
+<option value="mis">Post Office Monthly Income Scheme (MIS)</option>
+<option value="kvp">Kisan Vikas Patra (KVP)</option>
+<option value="custom">Other / Custom</option>
+</select></div>
+<div id="customerWrap"><label for="customer">Customer Type</label><select id="customer" onchange="updateRate()"><option value="regular">Regular</option><option value="senior">Senior Citizen</option></select></div>
+<div><label for="amount" id="amountLabel">Investment Amount (₹)</label><input type="number" id="amount" value="100000" min="1" step="100"></div>
+<div><label for="startDate">Start Date</label><input type="date" id="startDate"></div>
+<div><label for="months">Period (Months)</label><input type="number" id="months" value="24" min="1" step="1" onchange="updateRate()"></div>
+<div id="rateWrap"><label for="rate">Interest Rate (% p.a.)</label><input class="locked" type="number" id="rate" readonly></div>
+<div id="compoundWrap"><label for="compounding">Interest / Compounding</label><select id="compounding"></select></div>
+<div id="contribWrap" class="hidden"><label for="contribution">Regular Contribution (₹)</label><input type="number" id="contribution" value="10000" min="0" step="100"></div>
+<div id="contribFreqWrap" class="hidden"><label for="contribFreq">Contribution Frequency</label><select id="contribFreq"><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select></div>
+<div id="contribYearsWrap" class="hidden"><label for="contribYears">Contribution Period (Years)</label><input type="number" id="contribYears" value="4" min="0" step="1"></div>
+<div id="note" class="info full"></div>
+</div>
+
+</div>
+
+<div id="output" class="hidden">
+<div class="card"><h2>Summary</h2><div class="results">
+<div class="box"><div class="title">Total Principal / Deposits</div><div class="value" id="principal">₹0</div></div>
+<div class="box"><div class="title">Total Interest</div><div class="value" id="interest">₹0</div></div>
+<div class="box highlight"><div class="title">Maturity / Final Value</div><div class="value" id="maturity">₹0</div></div>
+<div class="box"><div class="title">Start Date</div><div class="value" id="startDisplay">-</div></div>
+<div class="box"><div class="title">End / Maturity Date</div><div class="value" id="maturityDate">-</div></div>
+<div class="box"><div class="title">Effective Return on Deposits</div><div class="value" id="returnPercent">0%</div></div>
+</div></div>
+<div class="card"><h2 id="tableTitle">Year / Month Breakdown</h2><div class="table-wrap"><table><thead><tr><th>Period</th><th>Opening Balance</th><th>Contribution</th><th>Interest</th><th>Total Interest</th><th>Closing Balance</th></tr></thead><tbody id="table"></tbody></table></div><div class="note" id="tableNote"></div></div>
+</div>
+</div>
+<script>
+const today=new Date();
+document.getElementById('startDate').value=today.toISOString().slice(0,10);
+
+// Rates checked against official pages on 03-Sep-2026 where available.
+// Bank rates are tenure-dependent; these tables intentionally cover common retail tenures.
+const schemes={
+ hdfcfd:{name:'HDFC Bank FD',type:'fd',rates:{regular:[[7,2.75],[30,3.25],[46,4.25],[90,4.25],[181,5.50],[274,5.75],[365,6.25],[456,6.35],[548,6.45],[730,6.45],[1096,6.50],[1661,6.40],[3650,6.15]],senior:[[7,3.25],[30,3.75],[46,4.75],[90,4.75],[181,6],[274,6.25],[365,6.75],[456,6.85],[548,6.95],[730,6.95],[1096,7.10],[1661,6.90],[3650,6.65]]},compound:4},
+ icicifd:{name:'ICICI Bank FD',type:'fd',rates:{regular:[[7,2.75],[365,6.25],[548,6.30],[731,6.45],[1096,6.50],[3650,6.50]],senior:[[7,3.25],[365,6.75],[548,6.80],[731,6.95],[1096,7.10],[3650,7.10]]},compound:4},
+ sbifd:{name:'SBI FD',type:'fd',rates:{regular:[[7,3.05],[46,4.90],[180,5.65],[211,5.90],[365,6.25],[730,6.45],[1096,6.30],[1826,6.05]],senior:[[7,3.55],[46,5.40],[180,6.15],[211,6.40],[365,6.75],[730,6.95],[1096,6.80],[1826,7.05]]},compound:4},
+ bankrd:{name:'HDFC Bank RD',type:'rd',rate:7.00,compound:4},
+ banksavings:{name:'Bank Savings',type:'savings',rate:2.50,compound:'daily'},
+ potd:{name:'Post Office Time Deposit',type:'fd',rateByMonths:{12:6.9,24:7.0,36:7.1,60:7.5},compound:4},
+ pord:{name:'Post Office RD',type:'rd',rate:6.7,compound:4},
+ ssa:{name:'SSA',type:'ssa',rate:8.2,compound:1},
+ ppf:{name:'PPF',type:'ssa',rate:7.1,compound:1},
+ mis:{name:'Post Office MIS',type:'mis',rate:7.4,compound:1},
+ kvp:{name:'KVP',type:'ssa',rate:7.5,compound:1},
+ custom:{name:'Custom',type:'custom',rate:7,compound:4}
+};
+
+function el(id){return document.getElementById(id)}
+function money(n){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(n)}
+function fmtDate(d){return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}
+function addMonths(date,m){let d=new Date(date),day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+m);let last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,last));return d}
+function daysInYear(y){return new Date(y,1,29).getMonth()===1?366:365}
+function daysBetween(a,b){return Math.max(0,(b-a)/86400000)}
+function currentMonths(){return Math.max(1,parseInt(el('months').value)||1)}
+function selected(){return schemes[el('scheme').value]}
+function rateFor(s,months,customer){
+ if(s.rates){let days=months*30.4375;let arr=s.rates[customer]||s.rates.regular;let chosen=arr[0][1];for(const x of arr){if(days>=x[0])chosen=x[1]}return chosen}
+ if(s.rateByMonths){let keys=Object.keys(s.rateByMonths).map(Number).sort((a,b)=>a-b);let k=keys[0];for(const x of keys)if(months>=x)k=x;return s.rateByMonths[k]}
+ return s.rate??7;
+}
+function schemeChanged(){
+ const key=el('scheme').value,s=selected();
+ el('customerWrap').classList.toggle('hidden',!['hdfcfd','icicifd','sbifd'].includes(key));
+ el('rateWrap').classList.toggle('hidden',s.type==='custom' ? false : false);
+ el('rate').readOnly=s.type!=='custom';
+ el('compoundWrap').classList.toggle('hidden',s.type==='ssa' || s.type==='ppf' || s.type==='mis' || s.type==='kvp' || s.type==='savings');
+ el('contribWrap').classList.toggle('hidden',!['ssa','ppf'].includes(key));
+ el('contribFreqWrap').classList.toggle('hidden',!['ssa','ppf'].includes(key));
+ el('contribYearsWrap').classList.toggle('hidden',!['ssa','ppf'].includes(key));
+ el('amountLabel').textContent=['ssa','ppf'].includes(key)?'Starting Balance (₹)':(['bankrd','pord'].includes(key)?'Monthly Installment (₹)':'Investment Amount (₹)');
+ if(key==='ssa') el('months').value=252;
+ if(key==='ppf') el('months').value=180;
+ let opts='';
+ if(s.type==='fd'||s.type==='rd'||s.type==='custom')opts='<option value="4">Quarterly compounding</option><option value="12">Monthly</option><option value="2">Half-Yearly</option><option value="1">Yearly</option>';
+ el('compounding').innerHTML=opts;
+ if(s.type==='custom')el('rate').readOnly=false;
+ updateRate();
+ const notes={
+ hdfcfd:'HDFC retail FD rates are tenure-dependent. Calculator uses the current published retail table for deposits below ₹3 crore. Compounding is set to quarterly for cumulative FD calculations.',
+ icicifd:'ICICI FD rates vary by tenure and customer type. Calculator uses the current published retail rates and quarterly compounding for the estimate.',
+ sbifd:'SBI FD rates vary by tenure and customer type. Calculator uses the current published retail card rates and quarterly compounding for the estimate.',
+ bankrd:'HDFC Bank states RD interest is calculated from each instalment date and compounded quarterly.',
+ banksavings:'Savings interest is modeled on the daily closing balance at the RBI-published 2.50% savings-deposit rate. Actual credit frequency can vary by bank.',
+ potd:'Post Office Time Deposit rates are fixed by tenure. Current published range is 6.9%–7.5%.',
+ pord:'Post Office RD is modeled at 6.7% with quarterly compounding.',
+ ssa:'SSA: current rate 8.2% p.a. Interest is calculated/credited yearly. For deposits, India Post uses the lowest balance between the close of the 5th day and month-end; deposits made by the 5th are therefore important. Rate can change quarterly.',
+ ppf:'PPF: current rate 7.1% p.a. Yearly compounding. This calculator is a projection; PPF has its own deposit timing and long tenure rules.',
+ mis:'Post Office MIS: current rate 7.4% p.a. Interest is paid monthly rather than compounded into the principal.',
+ kvp:'KVP: current rate 7.5% p.a. This is a long-duration government savings product; use the calculator as a projection rather than a redemption quote.',
+ custom:'Custom mode: enter your own rate and choose the compounding method.'};
+ el('note').textContent=notes[key]||'';
+}
+function updateRate(){
+ const key=el('scheme').value,s=selected();
+ if(s.type==='custom')return;
+ el('rate').value=rateFor(s,currentMonths(),el('customer').value).toFixed(2);
+ if(s.type==='ssa'||s.type==='ppf'||s.type==='mis'||s.type==='kvp'||s.type==='savings')return;
+ if(s.type==='fd'||s.type==='rd'){
+   if(el('compounding').options.length)el('compounding').value=String(s.compound||4);
+ }
+}
+
+function calculate(){
+ const key=el('scheme').value,s=selected();
+ const initial=parseFloat(el('amount').value),months=currentMonths(),rate=parseFloat(el('rate').value),start=new Date(el('startDate').value+'T00:00:00');
+ if(!initial||initial<0||!el('startDate').value||rate<0){alert('Please enter valid values.');return}
+ if(['ssa','ppf'].includes(key)) return calculateLongTerm(key,initial,months,rate,start);
+ if(key==='mis') return calculateMIS(initial,months,rate,start);
+ if(key==='banksavings') return calculateSavings(initial,months,rate,start);
+ if(key==='bankrd'||key==='pord') return calculateRD(initial,months,rate,start);
+ return calculateLumpSum(initial,months,rate,parseInt(el('compounding').value)||4,start,s.name);
+}
+function showSummary(principal,interest,final,start,end){
+ el('principal').textContent=money(principal);el('interest').textContent=money(interest);el('maturity').textContent=money(final);el('startDisplay').textContent=fmtDate(start);el('maturityDate').textContent=fmtDate(end);el('returnPercent').textContent=(principal?((interest/principal)*100):0).toFixed(2)+'%';el('output').classList.remove('hidden');
+}
+function row(label,o,c,i,ti,b){return `<tr><td>${label}</td><td>${money(o)}</td><td>${money(c)}</td><td>${money(i)}</td><td>${money(ti)}</td><td>${money(b)}</td></tr>`}
+function calculateLumpSum(principal,months,rate,n,start,name){
+ let balance=principal,totalI=0,html='';const years=months/12,final=principal*Math.pow(1+rate/100/n,n*years),end=addMonths(start,months);
+ // Show monthly equivalent only as a display breakdown; final result uses the selected compounding formula.
+ let growth=Math.pow(1+rate/100/n,n/12)-1;
+ for(let m=1;m<=months;m++){let o=balance,i=balance*growth;balance+=i;totalI+=i;html+=row('Month '+m,o,0,i,totalI,balance)}
+ showSummary(principal,final-principal,final,start,end);el('table').innerHTML=html;el('tableNote').textContent=`${name}: final value uses ${n===4?'quarterly':n===12?'monthly':n===2?'half-yearly':'yearly'} compounding. Monthly rows are a display breakdown consistent with that effective rate.`;
+}
+function calculateRD(monthly,months,rate,start){
+ let balance=0,totalDeposits=0,totalI=0,html='';const end=addMonths(start,months);
+ for(let m=1;m<=months;m++){
+  let o=balance;balance+=monthly;totalDeposits+=monthly;
+  let mi=balance*(Math.pow(1+rate/400,1/3)-1);balance+=mi;totalI+=mi;
+  html+=row('Month '+m,o,monthly,mi,totalI,balance);
+ }
+ showSummary(totalDeposits,totalI,balance,start,end);el('table').innerHTML=html;el('tableNote').textContent='RD estimate: the monthly installment is compounded quarterly. Exact maturity can differ slightly because actual installment dates and product-specific rules apply.';
+}
+function calculateSavings(initial,months,rate,start){
+ let b=initial,totalI=0,html='';for(let m=1;m<=months;m++){let o=b,mi=b*(Math.pow(1+rate/100,1/12)-1);b+=mi;totalI+=mi;html+=row('Month '+m,o,0,mi,totalI,b)}showSummary(initial,totalI,b,start,addMonths(start,months));el('table').innerHTML=html;el('tableNote').textContent='Savings accounts are modeled using an effective monthly equivalent for the daily-accrual annual rate. Actual bank interest is based on daily balances and credited according to the bank’s policy.';
+}
+function calculateMIS(initial,months,rate,start){let monthly=initial*rate/100/12,totalI=monthly*months,end=addMonths(start,months);let html='',b=initial;for(let m=1;m<=months;m++)html+=row('Month '+m,b,0,monthly,monthly*m,b);showSummary(initial,monthly*months,initial,start,end);el('table').innerHTML=html;el('tableNote').textContent='MIS pays interest monthly; the interest is not added to principal unless you separately reinvest it.';}
+function calculateLongTerm(key,initial,months,rate,start){
+ const contribution=parseFloat(el('contribution').value)||0, freq=el('contribFreq').value, yearsToContrib=Math.max(0,parseInt(el('contribYears').value)||0);
+ let balance=initial,totalDeposits=initial,totalI=0,yearInterest=0,html='';const end=addMonths(start,months);
+ // Scheme-specific annual-credit model: deposits are assumed on the 2nd of the month,
+ // so they receive interest for that month. Interest is accumulated during the year
+ // and credited at year-end, matching the annual compounding structure.
+ for(let m=1;m<=months;m++){
+   const monthInYear=(m-1)%12+1;
+   let c=0;
+   if((m-1)<yearsToContrib*12){
+     c=freq==='monthly'?contribution:(monthInYear===1?contribution:0);
+   }
+   balance+=c;totalDeposits+=c;
+   const mi=balance*rate/100/12;
+   yearInterest+=mi;
+   const isYearEnd=(monthInYear===12)||m===months;
+   if(isYearEnd){
+     const o=balance-yearInterest;
+     balance+=yearInterest;totalI+=yearInterest;
+     const yearNo=Math.ceil(m/12);
+     html+=row('Year '+yearNo,o,c?c:0,yearInterest,totalI,balance);
+     yearInterest=0;
+   }
+ }
+ showSummary(totalDeposits,totalI,balance,start,end);el('table').innerHTML=html;el('tableNote').textContent=key==='ssa'?'SSA: 8.2% is the current published rate. This projection assumes the rate stays unchanged for the entire projection. Actual SSA interest is based on the lowest balance between the close of the 5th day and month-end and is credited annually; future quarterly rate revisions can change the actual result.':'Projection using yearly interest crediting. Actual scheme rules, deposit timing and future rate revisions can affect the result.';
+}
+
+schemeChanged();
+// Auto-calculate whenever any input or selection changes.
+['scheme','customer','amount','startDate','months','rate','compounding','contribution','contribFreq','contribYears'].forEach(id=>{
+ const node=el(id);
+ if(node) node.addEventListener('input',()=>{ updateRate(); calculate(); });
+ if(node) node.addEventListener('change',()=>{ schemeChanged(); calculate(); });
+});
+
+</script>
+</body>
+</html>
