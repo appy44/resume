@@ -1,0 +1,110 @@
+Act as a Senior Software Architect reviewing the current Confluence document, “Observability Framework for DDD API Pattern – v2”.
+
+I received the following review comment:
+
+“We need to separate out alerts, dashboards, tracking into separate tables for each category so that it becomes easy for review and even during implementation as we would have separate stories/efforts for each category.”
+
+Task:
+
+Restructure the existing document to address this review comment.
+
+1. Preserve the existing framework
+
+Keep all five observability layers:
+
+1. Business Observability
+2. Application Observability
+3. Infrastructure Observability
+4. Traceability and Diagnostics
+5. Reliability Management — SLO & SLA
+
+Preserve all existing indicators, descriptions, formulas, example targets, classifications, technical explanations, and references.
+
+Do not remove, invent, or unnecessarily rewrite existing technical content.
+
+2. Separate requirements into three tables per layer
+
+For EACH observability layer, organize the requirements into the following sections:
+
+A. Metrics and Tracking Requirements
+
+Include:
+
+* Indicator name
+* Existing status (EXISTING / ENHANCED / NEW)
+* Indicator type (SLI / diagnostic metric / operational KPI, etc.)
+* What to measure
+* Formula or calculation
+* Example target
+* Data source
+* Proposed implementation component (CDK / DDD shared library / application / platform)
+
+B. Dashboard Requirements
+
+Include:
+
+* Dashboard or view name
+* Metrics or indicators displayed
+* Purpose
+* Data source
+* Suggested platform (CloudWatch / Dynatrace / Nobl9, where already specified)
+* Proposed implementation component
+
+C. Alerting Requirements
+
+Include:
+
+* Alert name
+* Related indicator
+* Trigger condition
+* Threshold
+* Severity, if defined
+* Monitoring platform
+* Proposed implementation component
+
+3. Follow these rules
+
+* Use only information available in the existing document.
+* Preserve existing formulas and numerical targets exactly.
+* Do not convert diagnostic metrics into SLOs unless the document explicitly identifies them as SLOs.
+* Do not assume an indicator marked EXISTING is already implemented in production.
+* Do not invent thresholds, severity levels, dashboards, or monitoring capabilities.
+* Where information is missing, use TBD or Needs validation.
+* Clearly label any proposed implementation ownership as Proposed — requires validation unless explicitly documented.
+* Do not duplicate identical information unnecessarily.
+* Maintain the current five-layer structure.
+* Preserve relevant architecture diagrams, explanations, and references.
+
+4. Make the document implementation-ready
+
+Ensure the tables can support separate future Jira stories for:
+
+1. Metrics collection and instrumentation.
+2. Dashboard creation and configuration.
+3. Alert configuration and integration.
+
+Where possible, identify whether the requirement belongs in:
+
+* AWS CDK constructs
+* DDD shared library
+* DDD Skills repository
+* Application code
+* Observability platform configuration
+
+Do not assume existing CDK or shared-library functionality without evidence.
+
+5. Final validation
+
+After restructuring:
+
+* Verify that no original indicator has been lost.
+* Verify that formulas and targets remain unchanged.
+* Check that metrics, dashboards, and alerts are clearly separated within every layer.
+* Identify missing information requiring team clarification.
+* Provide a brief summary of structural changes made.
+
+Expected output:
+
+An updated, review-ready Confluence document that retains the existing technical content while clearly separating tracking, dashboard, and alerting requirements for each observability layer.
+
+Please show the proposed changes before applying them to the original page, if supported.
